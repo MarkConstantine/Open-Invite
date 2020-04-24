@@ -149,7 +149,8 @@ class Session {
           { name: "Host", value: `<@${this.host.id}>` },
           { name: "Playing", value: this.constructFieldString(isEnded) }
         )
-        .setTimestamp();
+        .setTimestamp()
+        .setFooter("React to this message to join");
     }
   }
 
