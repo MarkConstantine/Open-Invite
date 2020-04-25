@@ -7,7 +7,7 @@ class _DiscordClient extends Client {
         if (usernameOrMention.startsWith("<@!")) {
             // Is mention.
             const id = usernameOrMention.match(/\d+/g)[0];
-            return this.users.cache.find(user => user.id === id)
+            return this.users.cache.find(user => user.id === id);
         } else {
             // Is username.
             return this.users.cache.find(user => user.username === usernameOrMention);
