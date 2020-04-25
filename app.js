@@ -17,12 +17,7 @@ DiscordClient.on("message", (message) => {
 
 DiscordClient.on("messageReactionAdd", (reaction, user) => {
   if (user.username === BOT_NAME) return;
-  SessionManager.addPlayerToSessionFromReaction(reaction, user);
-});
-
-DiscordClient.on("messageReactionRemove", (reaction, user) => {
-  if (user.username === BOT_NAME) return;
-  SessionManager.removePlayerFromSessionFromReaction(reaction, user);
+  SessionManager.handleReactionButtons(reaction, user);
 });
 
 DiscordClient.login(process.env.TOKEN);
