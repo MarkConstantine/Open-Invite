@@ -105,7 +105,19 @@ class _SessionManager {
     }
   }
 
-  addPlayerToSessionFromReaction(reaction, player) {
+  handleReactionButtons(reaction, user) {
+    if (reaction.emoji.name === Session.joinButton) {
+      this.addPlayerToSessionFromReaction(reaction, user);
+    }
+
+    if (reaction.emoji.name === Session.leaveButton) {
+      this.removePlayerFromSessionFromReaction(reaction, user);
+    }
+
+    // Do nothing if the reaction is not one of the buttons.
+  }
+
+  addPlayerToSessionFromReaction(reaction, user) {
     const sessionMessageId = reaction.message.id;
 
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
@@ -113,13 +125,16 @@ class _SessionManager {
     for (const [hostId, session] of Object.entries(this.sessions)) {
       if (session.embedMessage.id === sessionMessageId) {
         const session = this.getSessionFromUserId(hostId);
-        session.addPlayers([player]); // Ignoring return value.
+        // Don't do anything if the user is already connected.
+        if (!session.isUserConnected(user)) {
+          session.addPlayers([user]); // Ignoring return value.
+        }
         break;
       }
     }
   }
 
-  removePlayerFromSessionFromReaction(reaction, player) {
+  removePlayerFromSessionFromReaction(reaction, user) {
     const sessionMessageId = reaction.message.id;
 
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
@@ -127,7 +142,10 @@ class _SessionManager {
     for (const [hostId, session] of Object.entries(this.sessions)) {
       if (session.embedMessage.id === sessionMessageId) {
         const session = this.getSessionFromUserId(hostId);
-        session.removePlayers([player]); // Ignoring return value
+        // Don't do anything if the user is not connected.
+        if (session.isUserConnected(user)) {
+          session.removePlayers([user]); // Ignoring return value
+        }
         break;
       }
     }

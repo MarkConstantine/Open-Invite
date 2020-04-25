@@ -2,7 +2,9 @@
 const { MessageEmbed } = require("discord.js");
 
 class Session {
-  
+  static joinButton = "👍";
+  static leaveButton = "✋";
+
   /**
    * Create a new Session on the text channel provided by the message parameter.
    * @param {Message} message The command message used to create this session.
@@ -17,16 +19,8 @@ class Session {
     this.players = new Array(playerCount).fill(undefined);
     this.connected = 0;
     this.embedColor = Math.floor(Math.random() * 0xFFFFFF);
-    this.joinButton = "👍";
 
-    // Create a new embed message on discord.
-    message.channel.send(this.createEmbed()).then((embedMessage) => {
-      // Save the message response to update later.
-      this.embedMessage = embedMessage;
-      
-      // Create the join button.
-      this.embedMessage.react(this.joinButton);
-    });
+    this.updateEmbedMessage();
   }
 
   /**
@@ -34,7 +28,7 @@ class Session {
    * @param {User} player The user to search for.
    * @returns {boolean} True if the user is connected to the session. False otherwise.
    */
-  hasPlayer(player) {
+  isUserConnected(player) {
     return this.players.findIndex((user) => user !== undefined && user.id === player.id) !== -1;
   }
 
@@ -69,7 +63,7 @@ class Session {
 
     for (const player of playerList) {
       const openSlotIndex = this.players.indexOf(undefined);
-      if (openSlotIndex === -1 || this.hasPlayer(player)) {
+      if (openSlotIndex === -1 || this.isUserConnected(player)) {
         playersNotAddedList.push(player); // Could not add.
       }
       else {
@@ -155,10 +149,25 @@ class Session {
   }
 
   /**
-   * Updates the existing Discord embed message to the Session's new state.
+   * Updates the session info by deleting the old embed and
+   * creating a new embed message.
    */
-  updateEmbedMessage() {
-    this.embedMessage.edit(this.createEmbed());
+  updateEmbedMessage() {    
+    if (this.embedMessage !== undefined) {
+      this.embedMessage.delete();
+    }
+    
+    // Create a new embed message on discord.
+    this.message.channel.send(this.createEmbed()).then((embedMessage) => {
+      // Save the message response to update later.
+      this.embedMessage = embedMessage;
+      
+      // Create the join button.
+      this.embedMessage.react(Session.joinButton);
+
+      // Create the leave button.
+      this.embedMessage.react(Session.leaveButton);
+    });
   }
 
   /**
