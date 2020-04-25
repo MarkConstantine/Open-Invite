@@ -144,7 +144,7 @@ class Session {
           { name: "Playing", value: this.constructFieldString(isEnded) }
         )
         .setTimestamp()
-        .setFooter("React to this message to join");
+        .setFooter(`${Session.joinButton} to join. ${Session.leaveButton} to leave.`);
     }
   }
 
