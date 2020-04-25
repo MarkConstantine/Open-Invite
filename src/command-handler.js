@@ -2,50 +2,44 @@
 const SessionManager = require("./session-manager.js");
 const { MessageEmbed } = require("discord.js");
 
-// Instantiate only once.
-class _CommandHandler {
-  constructor() {
-    this.COMMANDS = {
-      HELP:   "!help",
-      START:  "!start",
-      ADD:    "!add",
-      REMOVE: "!remove",
-      END:    "!end",
-      RESIZE: "!resize",
-    };
+class CommandHandler {
+  static COMMANDS = {
+    HELP:   "!help",
+    START:  "!start",
+    ADD:    "!add",
+    REMOVE: "!remove",
+    END:    "!end",
+    RESIZE: "!resize",
+  };
 
-    this.help = [
-      { name: "Starting a Session"        , value: `${this.COMMANDS.START} [NUMBER_OF_PLAYERS] "TITLE"` },
-      { name: "Adding Players"            , value: `${this.COMMANDS.ADD} @username @username ...` },
-      { name: "Removing Players"          , value: `${this.COMMANDS.REMOVE} @username @username ...` },
-      { name: "Ending a Session"          , value: `${this.COMMANDS.END}` },
-      { name: "Change Number of Players"  , value: `${this.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`}
-    ];
-
-    this.defaultPlayerCount = 4;
-    this.defaultTitle = "Gaming Sesh";
-  }
+  static HELP_MESSAGE = [
+    { name: "Starting a Session"        , value: `${CommandHandler.COMMANDS.START} [NUMBER_OF_PLAYERS] "TITLE"` },
+    { name: "Adding Players"            , value: `${CommandHandler.COMMANDS.ADD} @username @username ...` },
+    { name: "Removing Players"          , value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...` },
+    { name: "Ending a Session"          , value: `${CommandHandler.COMMANDS.END}` },
+    { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`}
+  ];
 
   handle(message) {
     const command = message.content;
     const host = message.author;
     
-    if (command.startsWith(this.COMMANDS.HELP))
+    if (command.startsWith(CommandHandler.COMMANDS.HELP))
       this.handleHelpCommand(message);
 
-    if (command.startsWith(this.COMMANDS.START))
+    if (command.startsWith(CommandHandler.COMMANDS.START))
       this.handleStartCommand(message, command, host);
 
-    if (command.startsWith(this.COMMANDS.ADD))
+    if (command.startsWith(CommandHandler.COMMANDS.ADD))
       this.handleAddCommand(message, command, host);
 
-    if (command.startsWith(this.COMMANDS.REMOVE))
+    if (command.startsWith(CommandHandler.COMMANDS.REMOVE))
       this.handleRemoveCommand(message, command, host);
 
-    if (command.startsWith(this.COMMANDS.END))
+    if (command.startsWith(CommandHandler.COMMANDS.END))
       this.handleEndCommand(message, command, host);
     
-    if (command.startsWith(this.COMMANDS.RESIZE))
+    if (command.startsWith(CommandHandler.COMMANDS.RESIZE))
       this.handleResizeCommand(message, command, host);
 
     // Do nothing if command not recognized.
@@ -55,19 +49,19 @@ class _CommandHandler {
     const helpEmbed = new MessageEmbed()
       .setColor(0xFFFFFF)
       .setTitle("Game-Queue Help")
-      .addFields(this.help)
+      .addFields(CommandHandler.HELP_MESSAGE);
 
     message.reply(helpEmbed);
   }
 
   handleStartCommand(message, command, host) {
     const matchesInteger = command.match(/\d+/g);
-    let playerCount = this.defaultPlayerCount;
+    let playerCount = undefined;
     if (matchesInteger !== null)
       playerCount = parseInt(matchesInteger[0]); // Choosing first int as number of players.
 
     const matchesTitle = command.match(/"(.*?)"/);
-    let title = this.defaultTitle;
+    let title = undefined;
     if (matchesTitle !== null && matchesTitle[1] !== "")
       title = matchesTitle[1];
 
@@ -113,5 +107,4 @@ class _CommandHandler {
   }
 }
 
-const CommandHandler = new _CommandHandler();
-module.exports = CommandHandler;
+module.exports = new CommandHandler();
