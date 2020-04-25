@@ -2,11 +2,14 @@
 const DiscordClient = require("./discord-client.js");
 const Session = require("./session.js");
 
-// Instantiate only once.
-class _SessionManager {
-  constructor() {
+class SessionManager {
+  constructor(config = {
+    MAX_SESSION_SIZE: 50,
+    DEFAULT_PLAYER_COUNT: 4,
+    DEFAULT_TITLE: "Gaming Sesh",
+  }) {
+    this.config = config;
     this.sessions = {};
-    this.MAX_SESSION_SIZE = 50;
   }
 
   getSession(host) {
@@ -45,13 +48,13 @@ class _SessionManager {
     return userList;
   }
 
-  startSession(message, host, title, playerCount) {
+  startSession(message, host, title = this.config.DEFAULT_TITLE, playerCount = this.config.DEFAULT_PLAYER_COUNT) {
     if (this.hasSession(host)) {
       message.reply("You already have an active session. Please !end your existing sessions first.");
       return;
     }
     message.delete(); // Clear the caller's command.
-    if (playerCount > this.MAX_SESSION_SIZE) {
+    if (playerCount > this.config.MAX_SESSION_SIZE) {
       message.reply("The maximum number of players a session could have is 50 or less.");
       return;
     }
@@ -152,17 +155,16 @@ class _SessionManager {
   }
 
   resizeSession(message, host, newPlayerCount) {
-    if (newPlayerCount > this.MAX_SESSION_SIZE) {
+    if (newPlayerCount > this.config.MAX_SESSION_SIZE) {
       message.reply("The maximum number of players a session could have is 50 or less.");
       return;
     }
     const session = this.getSession(host);
     if (!session.resizePlayerCount(newPlayerCount)) {
-      message.reply(`Cannot resize the session to ${newPlayerCount} because there's ${session.connected} connected player(s)`);
+      message.reply(`Cannot resize the session to ${newPlayerCount} because there's ${session.connected} connected player(s).`);
       return;
     }
   }
 }
 
-const SessionManager = new _SessionManager();
-module.exports = SessionManager;
+module.exports = new SessionManager();
