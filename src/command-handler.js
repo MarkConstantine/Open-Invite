@@ -16,8 +16,8 @@ class _CommandHandler {
 
     this.help = [
       { name: "Starting a Session"        , value: `${this.COMMANDS.START} [NUMBER_OF_PLAYERS] "TITLE"` },
-      { name: "Adding Players"            , value: `${this.COMMANDS.ADD} [@USERNAME_1] [@USERNAME_2] ... [@USERNAME_N]` },
-      { name: "Removing Players"          , value: `${this.COMMANDS.REMOVE} [@USERNAME_1] [@USERNAME_2] ... [@USERNAME_N]` },
+      { name: "Adding Players"            , value: `${this.COMMANDS.ADD} @username @username ...` },
+      { name: "Removing Players"          , value: `${this.COMMANDS.REMOVE} @username @username ...` },
       { name: "Ending a Session"          , value: `${this.COMMANDS.END}` },
       { name: "Change Number of Players"  , value: `${this.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`}
     ];
