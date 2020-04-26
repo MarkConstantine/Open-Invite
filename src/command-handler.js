@@ -17,7 +17,7 @@ class CommandHandler {
     { name: "Adding Players"            , value: `${CommandHandler.COMMANDS.ADD} @username @username ...` },
     { name: "Removing Players"          , value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...` },
     { name: "Ending a Session"          , value: `${CommandHandler.COMMANDS.END}` },
-    { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`}
+    { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`},
   ];
 
   handle(message) {

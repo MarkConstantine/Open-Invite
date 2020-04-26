@@ -155,10 +155,15 @@ class SessionManager {
   }
 
   resizeSession(message, host, newPlayerCount) {
+    if (!this.hasSession(host)) {
+      message.reply("You have no active sessions?");
+      return;
+    }
     if (newPlayerCount > this.config.MAX_SESSION_SIZE) {
       message.reply("The maximum number of players a session could have is 50 or less.");
       return;
     }
+    message.delete(); // Clear the caller's command.
     const session = this.getSession(host);
     if (!session.resizePlayerCount(newPlayerCount)) {
       message.reply(`Cannot resize the session to ${newPlayerCount} because there's ${session.connected} connected player(s).`);
