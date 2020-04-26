@@ -171,10 +171,18 @@ class Session {
   }
 
   /**
-   * Update the existing Discord embed message to indicate that the Session has ended.
+   * Update the existing Discord embed message to indicate that 
+   * the Session has ended.
    */
   endSession() {
     this.embedMessage.edit(this.createEmbed(true));
+  }
+
+  /**
+   * Cancel the session by deleting the embed message.
+   */
+  cancelSession() {
+    this.embedMessage.delete();
   }
 }
 

@@ -10,6 +10,7 @@ class CommandHandler {
     REMOVE: "!remove",
     END:    "!end",
     RESIZE: "!resize",
+    CANCEL: "!cancel",
   };
 
   static HELP_MESSAGE = [
@@ -17,6 +18,7 @@ class CommandHandler {
     { name: "Adding Players"            , value: `${CommandHandler.COMMANDS.ADD} @username @username ...` },
     { name: "Removing Players"          , value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...` },
     { name: "Ending a Session"          , value: `${CommandHandler.COMMANDS.END}` },
+    { name: "Cancelling a Session"      , value: `${CommandHandler.COMMANDS.CANCEL}` },
     { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`},
   ];
 
@@ -42,6 +44,8 @@ class CommandHandler {
     if (command.startsWith(CommandHandler.COMMANDS.RESIZE))
       this.handleResizeCommand(message, command, host);
 
+    if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
+      this.handleCancelCommand(message, command, host);
     // Do nothing if command not recognized.
   }
 
@@ -104,6 +108,10 @@ class CommandHandler {
     const split = command.split(" ");
     const newPlayerCount = parseInt(split[1]);
     SessionManager.resizeSession(message, host, newPlayerCount);
+  }
+
+  handleCancelCommand(message, command, host) {
+    SessionManager.cancelSession(message, host);
   }
 }
 

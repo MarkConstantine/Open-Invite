@@ -170,6 +170,17 @@ class SessionManager {
       return;
     }
   }
+
+  cancelSession(message, host) {
+    if (!this.hasSession(host)) {
+      message.reply("You have no active sessions?");
+      return;
+    }
+    message.delete(); // Clear the caller's command.
+    const session = this.getSession(host);
+    session.cancelSession();
+    this.deleteSession(host);
+  }
 }
 
 module.exports = new SessionManager();
