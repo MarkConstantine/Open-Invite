@@ -184,6 +184,15 @@ class Session {
   cancelSession() {
     this.embedMessage.delete();
   }
+
+  /**
+   * Change the title of the session.
+   * @param {string} newTitle The new title to replace the existing title.
+   */
+  renameSession(newTitle) {
+    this.title = newTitle;
+    this.updateEmbedMessage();
+  }
 }
 
 module.exports = Session;

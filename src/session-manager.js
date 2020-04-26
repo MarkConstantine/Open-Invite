@@ -181,6 +181,16 @@ class SessionManager {
     session.cancelSession();
     this.deleteSession(host);
   }
+
+  renameSession(message, host, newTitle = this.config.DEFAULT_TITLE) {
+    if (!this.hasSession(host)) {
+      message.reply("You have no active sessions?");
+      return;
+    }
+    message.delete(); // Clear the caller's command.
+    const session = this.getSession(host);
+    session.renameSession(newTitle);
+  }
 }
 
 module.exports = new SessionManager();

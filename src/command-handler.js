@@ -11,6 +11,7 @@ class CommandHandler {
     END:    "!end",
     RESIZE: "!resize",
     CANCEL: "!cancel",
+    RENAME: "!rename",
   };
 
   static HELP_MESSAGE = [
@@ -20,6 +21,7 @@ class CommandHandler {
     { name: "Ending a Session"          , value: `${CommandHandler.COMMANDS.END}` },
     { name: "Cancelling a Session"      , value: `${CommandHandler.COMMANDS.CANCEL}` },
     { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`},
+    { name: "Change the Session Title"  , value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`},
   ];
 
   handle(message) {
@@ -46,6 +48,10 @@ class CommandHandler {
 
     if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
       this.handleCancelCommand(message, command, host);
+
+    if (command.startsWith(CommandHandler.COMMANDS.RENAME))
+      this.handleRenameCommand(message, command, host);
+
     // Do nothing if command not recognized.
   }
 
@@ -112,6 +118,14 @@ class CommandHandler {
 
   handleCancelCommand(message, command, host) {
     SessionManager.cancelSession(message, host);
+  }
+
+  handleRenameCommand(message, command, host) {
+    const matchesTitle = command.match(/"(.*?)"/);
+    let newTitle = undefined;
+    if (matchesTitle !== null && matchesTitle[1] !== "")
+      newTitle = matchesTitle[1];
+    SessionManager.renameSession(message, host, newTitle);
   }
 }
 
