@@ -6,11 +6,13 @@ class SessionManager {
   constructor(config = {
     MAX_SESSION_SIZE: 50,
     MAX_SESSION_DURATION_MS: 24 * 60 * 60 * 1000, // 24 Hours
+    CLEANUP_INTERVAL_MS: 1 * 60 * 60 * 1000, // 1 Hour
     DEFAULT_PLAYER_COUNT: 4,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
     this.config = config;
     this.sessions = {};
+    setInterval(() => this.cleanupOldSessions(), this.config.CLEANUP_INTERVAL_MS);
   }
 
   getSession(host) {
