@@ -118,13 +118,11 @@ class SessionManager {
   }
 
   addPlayerToSessionFromReaction(reaction, user) {
-    const sessionMessageId = reaction.message.id;
-
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
     // but eventually this loop needs to be refactored to something more performant.
-    for (const [hostId, session] of Object.entries(this.sessions)) {
-      if (session.embedMessage.id === sessionMessageId) {
+    for (const hostId in this.sessions) {
         const session = this.getSessionFromUserId(hostId);
+      if (session.embedMessage.id === reaction.message.id) {
         // Don't do anything if the user is already connected.
         if (!session.isUserConnected(user)) {
           session.addPlayers([user]); // Ignoring return value.
@@ -135,13 +133,11 @@ class SessionManager {
   }
 
   removePlayerFromSessionFromReaction(reaction, user) {
-    const sessionMessageId = reaction.message.id;
-
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
     // but eventually this loop needs to be refactored to something more performant.
-    for (const [hostId, session] of Object.entries(this.sessions)) {
-      if (session.embedMessage.id === sessionMessageId) {
+    for (const hostId in this.sessions) {
         const session = this.getSessionFromUserId(hostId);
+      if (session.embedMessage.id === reaction.message.id) {
         // Don't do anything if the user is not connected.
         if (session.isUserConnected(user)) {
           session.removePlayers([user]); // Ignoring return value
