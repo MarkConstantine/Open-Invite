@@ -19,8 +19,8 @@ class Session {
     this.players = new Array(playerCount).fill(undefined);
     this.connected = 0;
     this.embedColor = Math.floor(Math.random() * 0xFFFFFF);
-
-    this.updateEmbedMessage();
+    this.startTime = new Date();
+    this.sendEmbedMessage();
   }
 
   /**
@@ -149,14 +149,9 @@ class Session {
   }
 
   /**
-   * Updates the session info by deleting the old embed and
-   * creating a new embed message.
+   * Send the session's info as an Embed Message.
    */
-  updateEmbedMessage() {    
-    if (this.embedMessage !== undefined) {
-      this.embedMessage.delete();
-    }
-    
+  sendEmbedMessage() {
     // Create a new embed message on discord.
     this.message.channel.send(this.createEmbed()).then((embedMessage) => {
       // Save the message response to update later.
@@ -168,6 +163,17 @@ class Session {
       // Create the leave button.
       this.embedMessage.react(Session.leaveButton);
     });
+  }
+
+  /**
+   * Updates the session info by deleting the old embed and
+   * creating a new embed message.
+   */
+  updateEmbedMessage() {    
+    if (this.embedMessage !== undefined) {
+      this.embedMessage.delete();
+    }
+    this.sendEmbedMessage();
   }
 
   /**

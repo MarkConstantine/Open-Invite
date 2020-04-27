@@ -5,6 +5,7 @@ const Session = require("./session.js");
 class SessionManager {
   constructor(config = {
     MAX_SESSION_SIZE: 50,
+    MAX_SESSION_DURATION_MS: 24 * 60 * 60 * 1000, // 24 Hours
     DEFAULT_PLAYER_COUNT: 4,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
@@ -16,8 +17,8 @@ class SessionManager {
     return this.getSessionFromUserId(host.id);
   }
 
-  getSessionFromUserId(id) {
-    return this.sessions[id];
+  getSessionFromUserId(hostId) {
+    return this.sessions[hostId];
   }
 
   hasSession(host) {
@@ -29,7 +30,11 @@ class SessionManager {
   }
 
   deleteSession(host) {
-    delete this.sessions[host.id];
+    this.deleteSessionFromUserId(host.id);
+  }
+
+  deleteSessionFromUserId(hostId) {
+    delete this.sessions[hostId];
   }
 
   getUsers(message, usernameList) {
@@ -121,7 +126,7 @@ class SessionManager {
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
     // but eventually this loop needs to be refactored to something more performant.
     for (const hostId in this.sessions) {
-        const session = this.getSessionFromUserId(hostId);
+      const session = this.getSessionFromUserId(hostId);
       if (session.embedMessage.id === reaction.message.id) {
         // Don't do anything if the user is already connected.
         if (!session.isUserConnected(user)) {
@@ -136,7 +141,7 @@ class SessionManager {
     // #TODO: For now we loop through all active sessions to match the reaction message's ID with an Embed Message ID,
     // but eventually this loop needs to be refactored to something more performant.
     for (const hostId in this.sessions) {
-        const session = this.getSessionFromUserId(hostId);
+      const session = this.getSessionFromUserId(hostId);
       if (session.embedMessage.id === reaction.message.id) {
         // Don't do anything if the user is not connected.
         if (session.isUserConnected(user)) {
@@ -183,6 +188,17 @@ class SessionManager {
     message.delete(); // Clear the caller's command.
     const session = this.getSession(host);
     session.renameSession(newTitle);
+  }
+
+  cleanupOldSessions() {
+    const now = new Date();
+    for (const [hostId, session] of Object.entries(this.sessions)) {
+      const compare = new Date(session.startTime.getTime() + this.config.MAX_SESSION_DURATION_MS);
+      if (now >= compare) {
+        session.endSession();
+        this.deleteSessionFromUserId(hostId);
+      }
+    }    
   }
 }
 
