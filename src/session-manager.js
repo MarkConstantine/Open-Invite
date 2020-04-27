@@ -21,18 +21,15 @@ class SessionManager {
   }
 
   hasSession(host) {
-    const id = host.id;
-    return id in this.sessions;
+    return host.id in this.sessions;
   }
 
   setSession(host, newSession) {
-    const id = host.id;
-    this.sessions[id] = newSession;
+    this.sessions[host.id] = newSession;
   }
 
   deleteSession(host) {
-    const id = host.id;
-    delete this.sessions[id];
+    delete this.sessions[host.id];
   }
 
   getUsers(message, usernameList) {
