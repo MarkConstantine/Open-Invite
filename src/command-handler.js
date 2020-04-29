@@ -3,6 +3,7 @@ const SessionManager = require("./session-manager.js");
 const { MessageEmbed } = require("discord.js");
 const Logger = require("./logger.js")(module);
 
+/** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
   static COMMANDS = {
     HELP:   "!help",
@@ -147,9 +148,9 @@ class CommandHandler {
   /**
    * Parse the add command and send the information to the SessionManager to add
    * any number of users to the caller's session.
-   * @param {*} message 
-   * @param {*} command 
-   * @param {*} host 
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
    */
   handleAddCommand(message, command, host) {
     Logger.info(`Add from ${host.tag}: ${command}`);

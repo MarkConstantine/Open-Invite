@@ -3,7 +3,12 @@ const Logger = require("./logger.js")(module);
 const DiscordClient = require("./discord-client.js");
 const Session = require("./session.js");
 
+/** Class to manage all active sessions registered for this bot. */
 class SessionManager {
+  /**
+   * Create a new SessionManager with the provided configurations.
+   * @param {*} config Object containing various configurations for the SessionManager.
+   */
   constructor(config = {
     MAX_SESSION_SIZE: 50,
     MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours

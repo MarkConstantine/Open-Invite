@@ -2,6 +2,7 @@
 const Logger = require("./logger.js")(module);
 const { MessageEmbed } = require("discord.js");
 
+/** Class representing an active session message. */
 class Session {
   static joinButton = "👍";
   static leaveButton = "✋";
