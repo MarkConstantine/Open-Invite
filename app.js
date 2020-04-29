@@ -1,6 +1,7 @@
 "use strict";
 
 require("dotenv").config();
+const Logger = require("./src/logger.js")(module);
 const DiscordClient = require("./src/discord-client.js");
 const CommandHandler = require("./src/command-handler.js");
 const SessionManager = require("./src/session-manager.js");
@@ -8,7 +9,7 @@ const SessionManager = require("./src/session-manager.js");
 const BOT_NAME = "Game-Queue";
 
 DiscordClient.on("ready", () => {
-  console.log(`Logged in as ${DiscordClient.user.tag}`);
+  Logger.info(`Logged in as ${DiscordClient.user.tag}`);
 });
 
 DiscordClient.on("message", (message) => {

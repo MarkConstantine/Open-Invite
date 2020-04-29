@@ -1,38 +1,74 @@
 "use strict";
 const SessionManager = require("./session-manager.js");
 const { MessageEmbed } = require("discord.js");
+const Logger = require("./logger.js")(module);
 
 class CommandHandler {
   static COMMANDS = {
     HELP:   "!help",
     START:  "!start",
+    END:    "!end",
+    CANCEL: "!cancel",
     ADD:    "!add",
     REMOVE: "!remove",
-    END:    "!end",
     RESIZE: "!resize",
-    CANCEL: "!cancel",
     RENAME: "!rename",
   };
 
   static HELP_MESSAGE = [
-    { name: "Starting a Session"        , value: `${CommandHandler.COMMANDS.START} [NUMBER_OF_PLAYERS] "TITLE"` },
-    { name: "Adding Players"            , value: `${CommandHandler.COMMANDS.ADD} @username @username ...` },
-    { name: "Removing Players"          , value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...` },
-    { name: "Ending a Session"          , value: `${CommandHandler.COMMANDS.END}` },
-    { name: "Cancelling a Session"      , value: `${CommandHandler.COMMANDS.CANCEL}` },
-    { name: "Change Number of Players"  , value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_PLAYERS]`},
-    { name: "Change the Session Title"  , value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`},
+    {
+      name: "Print available commands",
+      value: `${CommandHandler.COMMANDS.HELP}`,
+    },
+    {
+      name: "Starting a Session",
+      value: `${CommandHandler.COMMANDS.START} [NUMBER_OF_USERS] "TITLE"`,
+    },
+    {
+      name: "Ending your Session (deactivates the session but keeps it in the channel's history)",
+      value: `${CommandHandler.COMMANDS.END}`
+    },
+    {
+      name: "Cancelling your session (removes the session from the channel's history)",
+      value: `${CommandHandler.COMMANDS.CANCEL}`,
+    },
+    {
+      name: "Adding users to your session",
+      value: `${CommandHandler.COMMANDS.ADD} @username @username ...`,
+    },
+    {
+      name: "Removing users from your session",
+      value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...`,
+    },
+    {
+      name: "Changing the number of slots for your session",
+      value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_USERS]`,
+    },
+    {
+      name: "Renaming your session's title",
+      value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`,
+    },
   ];
 
+  /**
+   * Determine if the received message is a command for this bot.
+   * @param {Message} message The message that the user sent.
+   */
   handle(message) {
     const command = message.content;
     const host = message.author;
-    
+
     if (command.startsWith(CommandHandler.COMMANDS.HELP))
-      this.handleHelpCommand(message);
+      this.handleHelpCommand(message, command, host);
 
     if (command.startsWith(CommandHandler.COMMANDS.START))
       this.handleStartCommand(message, command, host);
+
+    if (command.startsWith(CommandHandler.COMMANDS.END))
+      this.handleEndCommand(message, command, host);
+
+    if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
+      this.handleCancelCommand(message, command, host);
 
     if (command.startsWith(CommandHandler.COMMANDS.ADD))
       this.handleAddCommand(message, command, host);
@@ -40,14 +76,8 @@ class CommandHandler {
     if (command.startsWith(CommandHandler.COMMANDS.REMOVE))
       this.handleRemoveCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.END))
-      this.handleEndCommand(message, command, host);
-    
     if (command.startsWith(CommandHandler.COMMANDS.RESIZE))
       this.handleResizeCommand(message, command, host);
-
-    if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
-      this.handleCancelCommand(message, command, host);
 
     if (command.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
@@ -55,72 +85,132 @@ class CommandHandler {
     // Do nothing if command not recognized.
   }
 
-  handleHelpCommand(message) {
+  /**
+   * Print a help message for the user containing all the available commands.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleHelpCommand(message, command, host) {
+    Logger.info(`Help from ${host.tag}: ${command}`);
     const helpEmbed = new MessageEmbed()
-      .setColor(0xFFFFFF)
+      .setColor(0xffffff)
       .setTitle("Game-Queue Help")
       .addFields(CommandHandler.HELP_MESSAGE);
-
     message.reply(helpEmbed);
   }
 
+  /**
+   * Parse the start command and send the information to the SessionManager to create
+   * a session for the user.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
   handleStartCommand(message, command, host) {
+    Logger.info(`Start from ${host.tag}: ${command}`);
     const matchesInteger = command.match(/\d+/g);
-    let playerCount = undefined;
+    let userCount = undefined;
     if (matchesInteger !== null)
-      playerCount = parseInt(matchesInteger[0]); // Choosing first int as number of players.
+      userCount = parseInt(matchesInteger[0]); // Choosing first int as number of users.
 
     const matchesTitle = command.match(/"(.*?)"/);
     let title = undefined;
     if (matchesTitle !== null && matchesTitle[1] !== "")
       title = matchesTitle[1];
 
-    SessionManager.startSession(message, host, title, playerCount);
+    SessionManager.startSession(message, host, title, userCount);
   }
 
-  handleAddCommand(message, command, host) {
-    const split = command.split(" ");
-    const playerUsernamesToAddList = [];
-
-    for (let i = 1; i < split.length; i++) {
-      const trimmed = split[i].trim();
-      if (trimmed !== "") {
-        playerUsernamesToAddList.push(trimmed);
-      }
-    }
-    
-    SessionManager.addPlayersToSession(message, host, playerUsernamesToAddList);
-  }
-
-  handleRemoveCommand(message, command, host) {
-    const split = command.split(" ");
-    const playerUsernamesToRemoveList = [];
-
-    for (let i = 1; i < split.length; i++) {
-      const trimmed = split[i].trim();
-      if (trimmed !== "") {
-        playerUsernamesToRemoveList.push(trimmed);
-      }
-    }
-
-    SessionManager.removePlayersFromSession(message, host, playerUsernamesToRemoveList);
-  }
-
+  /**
+   * Inform the SessionManager that the user wishes to end his/her session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
   handleEndCommand(message, command, host) {
+    Logger.info(`End from ${host.tag}: ${command}`);
     SessionManager.endSession(message, host);
   }
 
-  handleResizeCommand(message, command, host) {
-    const split = command.split(" ");
-    const newPlayerCount = parseInt(split[1]);
-    SessionManager.resizeSession(message, host, newPlayerCount);
-  }
-
+  /**
+   * Inform the SessionManager that the user wishes to cancel (i.e. delete) his/her session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
   handleCancelCommand(message, command, host) {
+    Logger.info(`Cancel from ${host.tag}: ${command}`);
     SessionManager.cancelSession(message, host);
   }
 
+  /**
+   * Parse the add command and send the information to the SessionManager to add
+   * any number of users to the caller's session.
+   * @param {*} message 
+   * @param {*} command 
+   * @param {*} host 
+   */
+  handleAddCommand(message, command, host) {
+    Logger.info(`Add from ${host.tag}: ${command}`);
+    const split = command.split(" ");
+    const usernamesToAddList = [];
+
+    for (let i = 1; i < split.length; i++) {
+      const trimmed = split[i].trim();
+      if (trimmed !== "") {
+        usernamesToAddList.push(trimmed);
+      }
+    }
+
+    SessionManager.addUsersToSession(message, host, usernamesToAddList);
+  }
+
+  /**
+   * Parse the remove command and send the information to the SessionManager to remove
+   * any number of users from the caller's session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleRemoveCommand(message, command, host) {
+    Logger.info(`Remove from ${host.tag}: ${command}`);
+    const split = command.split(" ");
+    const usernamesToRemoveList = [];
+
+    for (let i = 1; i < split.length; i++) {
+      const trimmed = split[i].trim();
+      if (trimmed !== "") {
+        usernamesToRemoveList.push(trimmed);
+      }
+    }
+
+    SessionManager.removeUsersFromSession(message, host, usernamesToRemoveList);
+  }
+
+  /**
+   * Parse the resize command and send the information to the SessionManager to resize
+   * the user count of the caller's session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleResizeCommand(message, command, host) {
+    Logger.info(`Resize from ${host.tag}: ${command}`);
+    const split = command.split(" ");
+    const newUserCount = parseInt(split[1]);
+    SessionManager.resizeSession(message, host, newUserCount);
+  }
+
+  /**
+   * Parse the rename command and send the information to the SessionManager to rename
+   * the title of the caller's session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
   handleRenameCommand(message, command, host) {
+    Logger.info(`Rename from ${host.tag}: ${command}`);
     const matchesTitle = command.match(/"(.*?)"/);
     let newTitle = undefined;
     if (matchesTitle !== null && matchesTitle[1] !== "")
