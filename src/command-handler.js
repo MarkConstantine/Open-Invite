@@ -6,14 +6,15 @@ const Logger = require("./logger.js")(module);
 /** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
   static COMMANDS = {
-    HELP:   "!help",
-    START:  "!start",
-    END:    "!end",
-    CANCEL: "!cancel",
-    ADD:    "!add",
-    REMOVE: "!remove",
-    RESIZE: "!resize",
-    RENAME: "!rename",
+    HELP:     "!help",
+    START:    "!start",
+    END:      "!end",
+    CANCEL:   "!cancel",
+    ADD:      "!add",
+    REMOVE:   "!remove",
+    RESIZE:   "!resize",
+    RENAME:   "!rename",
+    COINFLIP: "!coinflip"
   };
 
   static HELP_MESSAGE = [
@@ -49,6 +50,10 @@ class CommandHandler {
       name: "Renaming your session's title",
       value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`,
     },
+    {
+      name: "Flip a coin (for settling disbutes)",
+      value: `${CommandHandler.COMMANDS.COINFLIP}`,
+    },
   ];
 
   /**
@@ -82,6 +87,9 @@ class CommandHandler {
 
     if (command.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
+
+    if (command.startsWith(CommandHandler.COMMANDS.COINFLIP))
+      this.handleCoinFlipCommand(message, command, host);
 
     // Do nothing if command not recognized.
   }
@@ -217,6 +225,18 @@ class CommandHandler {
     if (matchesTitle !== null && matchesTitle[1] !== "")
       newTitle = matchesTitle[1];
     SessionManager.renameSession(message, host, newTitle);
+  }
+
+  /**
+   * Flip a coin (for settling disbutes).
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleCoinFlipCommand(message, command, host) {
+    const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails" ;
+    Logger.info(`Coinflip ${result} from ${host.tag}: ${command}`);
+    message.reply(result);
   }
 }
 

@@ -14,3 +14,4 @@ A Discord queue bot.
 | Removing users from your session                                                    | !remove [@username_1][@username_2] ... [@username_N] |
 | Changing the number of slots for your session                                       | !resize [NUMBER_OF_PLAYERS]                          |
 | Renaming your session's title                                                       | !rename "NEW TITLE"                                  |
+| Flip a coin (for settling disbutes)                                                 | !coinflip                                            |
