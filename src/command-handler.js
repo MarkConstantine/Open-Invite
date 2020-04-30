@@ -6,15 +6,16 @@ const Logger = require("./logger.js")(module);
 /** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
   static COMMANDS = {
-    HELP:     "!help",
-    START:    "!start",
-    END:      "!end",
-    CANCEL:   "!cancel",
-    ADD:      "!add",
-    REMOVE:   "!remove",
-    RESIZE:   "!resize",
-    RENAME:   "!rename",
-    COINFLIP: "!coinflip"
+    HELP:         "!help",
+    START:        "!start",
+    END:          "!end",
+    CANCEL:       "!cancel",
+    ADD:          "!add",
+    REMOVE:       "!remove",
+    RESIZE:       "!resize",
+    RENAME:       "!rename",
+    ADVERTISE:    "!advertise",
+    COINFLIP:     "!coinflip"
   };
 
   static HELP_MESSAGE = [
@@ -49,6 +50,10 @@ class CommandHandler {
     {
       name: "Renaming your session's title",
       value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`,
+    },
+    {
+      name: "Advertise your session (repost your session so it's at the bottom of the chat)",
+      value: `${CommandHandler.COMMANDS.ADVERTISE}`,
     },
     {
       name: "Flip a coin (for settling disbutes)",
@@ -87,6 +92,9 @@ class CommandHandler {
 
     if (command.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
+
+      if (command.startsWith(CommandHandler.COMMANDS.ADVERTISE))
+      this.handleAdvertiseCommand(message, command, host);
 
     if (command.startsWith(CommandHandler.COMMANDS.COINFLIP))
       this.handleCoinFlipCommand(message, command, host);
@@ -132,7 +140,7 @@ class CommandHandler {
   }
 
   /**
-   * Inform the SessionManager that the user wishes to end his/her session.
+   * Inform the SessionManager that the user wishes to end their session.
    * @param {Message} message The message that the user sent.
    * @param {string} command The original command that the user sent. 
    * @param {User} host The sender of the command.
@@ -143,7 +151,7 @@ class CommandHandler {
   }
 
   /**
-   * Inform the SessionManager that the user wishes to cancel (i.e. delete) his/her session.
+   * Inform the SessionManager that the user wishes to cancel (i.e. delete) their session.
    * @param {Message} message The message that the user sent.
    * @param {string} command The original command that the user sent. 
    * @param {User} host The sender of the command.
@@ -225,6 +233,17 @@ class CommandHandler {
     if (matchesTitle !== null && matchesTitle[1] !== "")
       newTitle = matchesTitle[1];
     SessionManager.renameSession(message, host, newTitle);
+  }
+
+  /**
+   * Inform the SessionManager that the user wishes to advertise their session.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command. 
+   */
+  handleAdvertiseCommand(message, command, host) {
+    Logger.info(`Advertise from ${host.tag}: ${command}`);
+    SessionManager.advertiseSession(message, host);
   }
 
   /**
