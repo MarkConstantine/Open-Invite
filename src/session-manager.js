@@ -286,11 +286,9 @@ class SessionManager {
     // but eventually this loop needs to be refactored to something more performant.
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
-      if (session.embedMessage.id === reaction.message.id) {
-        // Don't do anything if the user is already connected.
-        if (!session.isUserConnected(user)) {
-          session.addUsers([user]); // Ignoring return value.
-        }
+      // Don't do anything if the user is already connected.
+      if (session.embedMessage.id === reaction.message.id && !session.isUserConnected(user)) {
+        session.addUsers([user]); // Ignoring return value.
         break;
       }
     }
@@ -309,11 +307,9 @@ class SessionManager {
     // but eventually this loop needs to be refactored to something more performant.
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
-      if (session.embedMessage.id === reaction.message.id) {
-        // Don't do anything if the user is not connected.
-        if (session.isUserConnected(user)) {
-          session.removeUsers([user]); // Ignoring return value
-        }
+      // Don't do anything if the user is not connected.
+      if (session.embedMessage.id === reaction.message.id && session.isUserConnected(user)) {
+        session.removeUsers([user]); // Ignoring return value
         break;
       }
     }

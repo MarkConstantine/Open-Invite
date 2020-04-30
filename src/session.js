@@ -47,7 +47,7 @@ class Session {
         .remove()
         .then(() => Logger.info(`${this.end.name}, host=${this.host.tag}. Leave button deleted.`))
         .catch(error => Logger.error(`Failed to remove leaveButton: ${error}`));
-  }
+    }
   }
 
   /**
@@ -152,7 +152,9 @@ class Session {
    * @returns {boolean} True if the user is connected to the session. False otherwise.
    */
   isUserConnected(userToSearch) {
-    return this.users.findIndex((user) => user !== undefined && user.id === userToSearch.id) !== -1;
+    const result = this.users.findIndex((user) => user !== undefined && user.id === userToSearch.id) !== -1;
+    Logger.info(`${this.isUserConnected.name}, host=${this.host.tag}, userToSearch=${userToSearch}, result=${result}`);
+    return result;
   }
 
   /**
@@ -187,8 +189,8 @@ class Session {
         .setColor(this.embedColor)
         .setTitle(this.title)
         .setThumbnail(this.host.displayAvatarURL())
+        .addField("Host", `<@${this.host.id}>`)
         .addFields(
-          { name: "Host", value: `<@${this.host.id}>` },
           { name: "Playing", value: this.constructFieldString(isEnded) }
         )
         .setTimestamp()
@@ -198,11 +200,11 @@ class Session {
         .setColor(this.embedColor)
         .setTitle(this.title)
         .setThumbnail(this.host.displayAvatarURL())
+        .addField("Host", `<@${this.host.id}>`)
         .addFields(
-          { name: "Host", value: `<@${this.host.id}>` },
           { name: "Playing", value: this.constructFieldString(isEnded) }
         )
-        .setTimestamp()
+        .setTimestamp(this.startTime)
         .setFooter(`${Session.joinButton} to join. ${Session.leaveButton} to leave.`);
     }
   }
