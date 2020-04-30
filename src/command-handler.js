@@ -2,6 +2,7 @@
 const SessionManager = require("./session-manager.js");
 const { MessageEmbed } = require("discord.js");
 const Logger = require("./logger.js")(module);
+const Session = require("./session.js");
 
 /** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
@@ -20,43 +21,43 @@ class CommandHandler {
 
   static HELP_MESSAGE = [
     {
-      name: "Print available commands",
+      name: `Print available commands`,
       value: `${CommandHandler.COMMANDS.HELP}`,
     },
     {
-      name: "Starting a Session",
+      name: `Starting a Session`,
       value: `${CommandHandler.COMMANDS.START} [NUMBER_OF_USERS] "TITLE"`,
     },
     {
-      name: "Ending your Session (deactivates the session but keeps it in the channel's history)",
+      name: `Ending your Session (deactivates the session but keeps it in the chat)`,
       value: `${CommandHandler.COMMANDS.END}`
     },
     {
-      name: "Cancelling your session (removes the session from the channel's history)",
+      name: `Cancelling your session (removes the session from the chat)`,
       value: `${CommandHandler.COMMANDS.CANCEL}`,
     },
     {
-      name: "Adding users to your session",
+      name: `Adding users to your session (users could also join by reacting with ${Session.joinButton})`,
       value: `${CommandHandler.COMMANDS.ADD} @username @username ...`,
     },
     {
-      name: "Removing users from your session",
+      name: `Removing users from your session (users could also leave by reacting with ${Session.leaveButton})`,
       value: `${CommandHandler.COMMANDS.REMOVE} @username @username ...`,
     },
     {
-      name: "Changing the number of slots for your session",
+      name: `Changing the number of slots for your session`,
       value: `${CommandHandler.COMMANDS.RESIZE} [NUMBER_OF_USERS]`,
     },
     {
-      name: "Renaming your session's title",
+      name: `Renaming your session's title`,
       value: `${CommandHandler.COMMANDS.RENAME} "NEW TITLE"`,
     },
     {
-      name: "Advertise your session (repost your session so it's at the bottom of the chat)",
+      name: `Advertise your session (repost your session so it's at the bottom of the chat)`,
       value: `${CommandHandler.COMMANDS.ADVERTISE}`,
     },
     {
-      name: "Flip a coin (for settling disbutes)",
+      name: `Flip a coin (for settling disbutes)`,
       value: `${CommandHandler.COMMANDS.COINFLIP}`,
     },
   ];
