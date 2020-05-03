@@ -18,7 +18,7 @@ class DiscordBot extends Client {
     });
 
     this.on("guildMemberAdd", member => {
-      Logger.info(`guildMemberAdd, ${member.nickname}(ID=${member.id}) joined ${member.guild.name}`);
+      Logger.info(`guildMemberAdd, ${member.user.username}(ID=${member.id}) joined ${member.guild.name}`);
       member.fetch()
         .then(Logger.info("Updated user cache"))
         .catch(error => Logger.error(`Error fetching members on guildMemberAdd: ${error}`));
