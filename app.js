@@ -1,24 +1,32 @@
 "use strict";
 
 require("dotenv").config();
-const Logger = require("./src/logger.js")(module);
-const DiscordClient = require("./src/discord-client.js");
+const DiscordBot = require("./src/discord-bot.js");
 const CommandHandler = require("./src/command-handler.js");
 const SessionManager = require("./src/session-manager.js");
 
-const BOT_NAME = "Game-Queue";
+class GameQueue {
+  constructor() {
+    this.botName = "Game-Queue";
+    this.discordBot = new DiscordBot("Game-Queue");
+    this.sessionManager = new SessionManager(this.discordBot);
+    this.commandHandler = new CommandHandler(this.sessionManager);
 
-DiscordClient.on("ready", () => {
-  Logger.info(`Logged in as ${DiscordClient.user.tag}`);
-});
+    this.discordBot.on("message", (message) => {
+      this.commandHandler.handle(message);
+    });
 
-DiscordClient.on("message", (message) => {
-  CommandHandler.handle(message);
-});
+    this.discordBot.on("messageReactionAdd", (reaction, user) => {
+      if (user.username === this.botName) return;
+      this.sessionManager.handleReactionButtons(reaction, user);
+    });
+  }
 
-DiscordClient.on("messageReactionAdd", (reaction, user) => {
-  if (user.username === BOT_NAME) return;
-  SessionManager.handleReactionButtons(reaction, user);
-});
+  start(token) {
+    this.discordBot.login(token);
+  }
+}
 
-DiscordClient.login(process.env.TOKEN);
+const gameQueue = new GameQueue();
+gameQueue.start(process.env.TOKEN);
+

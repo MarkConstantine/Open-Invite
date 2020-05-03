@@ -35,16 +35,14 @@ class Session {
 
     const joinButtonReaction = this.embedMessage.reactions.cache.get(Session.joinButton);
     if (joinButtonReaction !== undefined) {
-      joinButtonReaction
-        .remove()
+      joinButtonReaction.remove()
         .then(() => Logger.info(`${this.end.name}, host=${this.host.tag}. Join button deleted.`))
         .catch(error => Logger.error(`${this.end.name}, host=${this.host.tag}. Failed to remove joinButton: ${error}`));
     }
 
     const leaveButtonReaction = this.embedMessage.reactions.cache.get(Session.leaveButton);
     if (leaveButtonReaction !== undefined) {
-      leaveButtonReaction
-        .remove()
+      leaveButtonReaction.remove()
         .then(() => Logger.info(`${this.end.name}, host=${this.host.tag}. Leave button deleted.`))
         .catch(error => Logger.error(`Failed to remove leaveButton: ${error}`));
     }

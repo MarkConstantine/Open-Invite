@@ -1,5 +1,4 @@
 "use strict";
-const SessionManager = require("./session-manager.js");
 const { MessageEmbed } = require("discord.js");
 const Logger = require("./logger.js")(module);
 const Session = require("./session.js");
@@ -61,6 +60,10 @@ class CommandHandler {
       value: `${CommandHandler.COMMANDS.COINFLIP}`,
     },
   ];
+
+  constructor(sessionManager) {
+    this.sessionManager = sessionManager;
+  }
 
   /**
    * Determine if the received message is a command for this bot.
@@ -137,7 +140,7 @@ class CommandHandler {
     if (matchesTitle !== null && matchesTitle[1] !== "")
       title = matchesTitle[1];
 
-    SessionManager.startSession(message, host, title, userCount);
+      this.sessionManager.startSession(message, host, title, userCount);
   }
 
   /**
@@ -148,7 +151,7 @@ class CommandHandler {
    */
   handleEndCommand(message, command, host) {
     Logger.info(`End from ${host.tag}: ${command}`);
-    SessionManager.endSession(message, host);
+    this.sessionManager.endSession(message, host);
   }
 
   /**
@@ -159,7 +162,7 @@ class CommandHandler {
    */
   handleCancelCommand(message, command, host) {
     Logger.info(`Cancel from ${host.tag}: ${command}`);
-    SessionManager.cancelSession(message, host);
+    this.sessionManager.cancelSession(message, host);
   }
 
   /**
@@ -181,7 +184,7 @@ class CommandHandler {
       }
     }
 
-    SessionManager.addUsersToSession(message, host, usernamesToAddList);
+    this.sessionManager.addUsersToSession(message, host, usernamesToAddList);
   }
 
   /**
@@ -203,7 +206,7 @@ class CommandHandler {
       }
     }
 
-    SessionManager.removeUsersFromSession(message, host, usernamesToRemoveList);
+    this.sessionManager.removeUsersFromSession(message, host, usernamesToRemoveList);
   }
 
   /**
@@ -217,7 +220,7 @@ class CommandHandler {
     Logger.info(`Resize from ${host.tag}: ${command}`);
     const split = command.split(" ");
     const newUserCount = parseInt(split[1]);
-    SessionManager.resizeSession(message, host, newUserCount);
+    this.sessionManager.resizeSession(message, host, newUserCount);
   }
 
   /**
@@ -233,7 +236,7 @@ class CommandHandler {
     let newTitle = undefined;
     if (matchesTitle !== null && matchesTitle[1] !== "")
       newTitle = matchesTitle[1];
-    SessionManager.renameSession(message, host, newTitle);
+    this.sessionManager.renameSession(message, host, newTitle);
   }
 
   /**
@@ -244,7 +247,7 @@ class CommandHandler {
    */
   handleAdvertiseCommand(message, command, host) {
     Logger.info(`Advertise from ${host.tag}: ${command}`);
-    SessionManager.advertiseSession(message, host);
+    this.sessionManager.advertiseSession(message, host);
   }
 
   /**
@@ -260,4 +263,4 @@ class CommandHandler {
   }
 }
 
-module.exports = new CommandHandler();
+module.exports = CommandHandler;

@@ -1,21 +1,22 @@
 "use strict";
 const Logger = require("./logger.js")(module);
-const DiscordClient = require("./discord-client.js");
 const Session = require("./session.js");
 
 /** Class to manage all active sessions registered for this bot. */
 class SessionManager {
   /**
    * Create a new SessionManager with the provided configurations.
+   * @param {DiscordBot} discordBot Dependency for performing Discord specific operations.
    * @param {*} config Object containing various configurations for the SessionManager.
    */
-  constructor(config = {
+  constructor(discordBot, config = {
     MAX_SESSION_SIZE: 50,
     MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours
     CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hour
     DEFAULT_SESSION_SIZE: 5,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
+    this.discordBot = discordBot;
     this.config = config;
     this.sessions = {};
     setInterval(() => this.cleanupOldSessions(), this.config.CLEANUP_INTERVAL_MS);
@@ -70,7 +71,7 @@ class SessionManager {
   getUsers(message, usernameList) {
     const userList = [];
     for (const username of usernameList) {
-      const user = DiscordClient.getUser(username);
+      const user = this.discordBot.getUser(username);
       if (user === undefined) {
         Logger.error(`${this.getUsers.name}, Could not find user ${username}`);
         message.reply(`Could not find user by the username: ${username}`);
@@ -335,4 +336,4 @@ class SessionManager {
   }
 }
 
-module.exports = new SessionManager();
+module.exports = SessionManager;
