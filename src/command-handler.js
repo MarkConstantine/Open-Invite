@@ -15,7 +15,8 @@ class CommandHandler {
     RESIZE:       "!resize",
     RENAME:       "!rename",
     ADVERTISE:    "!advertise",
-    COINFLIP:     "!coinflip"
+    COINFLIP:     "!coinflip",
+    ROLLDICE:     "!rolldice",
   };
 
   static HELP_MESSAGE = [
@@ -59,6 +60,10 @@ class CommandHandler {
       name: `Flip a coin (for settling disbutes)`,
       value: `${CommandHandler.COMMANDS.COINFLIP}`,
     },
+    {
+      name: `Roll a dice with any number of sides`,
+      value: `${CommandHandler.COMMANDS.ROLLDICE} [NUMBER_OF_SIDES]`,
+    },
   ];
 
   constructor(sessionManager) {
@@ -97,11 +102,14 @@ class CommandHandler {
     if (command.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
 
-      if (command.startsWith(CommandHandler.COMMANDS.ADVERTISE))
+    if (command.startsWith(CommandHandler.COMMANDS.ADVERTISE))
       this.handleAdvertiseCommand(message, command, host);
 
     if (command.startsWith(CommandHandler.COMMANDS.COINFLIP))
       this.handleCoinFlipCommand(message, command, host);
+
+    if (command.startsWith(CommandHandler.COMMANDS.ROLLDICE))
+      this.handleRollDiceCommand(message, command, host);
 
     // Do nothing if command not recognized.
   }
@@ -259,6 +267,25 @@ class CommandHandler {
   handleCoinFlipCommand(message, command, host) {
     const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails" ;
     Logger.info(`Coinflip ${result} from ${host.tag}: ${command}`);
+    message.reply(result);
+  }
+
+  /**
+   * Roll a dice with any number of sides.
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleRollDiceCommand(message, command, host) {
+    const sides = command.match(/\d+/g)[0];
+
+    if (sides <= 0) {
+      message.reply("The number of sides must be 1 or more.");
+      return;
+    }
+
+    const result = Math.floor(Math.random() * sides) + 1;
+    Logger.info(`Rolldice ${result} from ${host.tag}: ${command}`);
     message.reply(result);
   }
 }
