@@ -29,4 +29,5 @@ A Discord bot for creating an open invite to anything (games, events, etc.) for 
 3. Download this project
    - Replace **`YOUR TOKEN HERE`** in the [.env](.env) file with the proper token for your bot.
 4. Run the bot by traversing to this project's root directory and typing the following in a terminal _(assuming you have node defined in your path)_:
+   - **`npm install`**
    - **`node src/app.js`**
