@@ -124,7 +124,7 @@ class CommandHandler {
     Logger.info(`Help from ${host.tag}: ${command}`);
     const helpEmbed = new MessageEmbed()
       .setColor(0xffffff)
-      .setTitle("Game-Queue Help")
+      .setTitle("Open-Invite Help")
       .addFields(CommandHandler.HELP_MESSAGE);
     message.reply(helpEmbed);
   }

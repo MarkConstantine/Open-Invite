@@ -12,7 +12,7 @@ class SessionManager {
   constructor(discordBot, config = {
     MAX_SESSION_SIZE: 50,
     MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours
-    CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hour
+    CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hours
     DEFAULT_SESSION_SIZE: 5,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {

@@ -1,14 +1,14 @@
 "use strict";
 
 require("dotenv").config();
-const DiscordBot = require("./src/discord-bot.js");
-const CommandHandler = require("./src/command-handler.js");
-const SessionManager = require("./src/session-manager.js");
+const DiscordBot = require("./discord-bot.js");
+const CommandHandler = require("./command-handler.js");
+const SessionManager = require("./session-manager.js");
 
-class GameQueue {
+class OpenInvite {
   constructor() {
-    this.botName = "Game-Queue";
-    this.discordBot = new DiscordBot("Game-Queue");
+    this.botName = "Open-Invite";
+    this.discordBot = new DiscordBot();
     this.sessionManager = new SessionManager(this.discordBot);
     this.commandHandler = new CommandHandler(this.sessionManager);
 
@@ -27,6 +27,6 @@ class GameQueue {
   }
 }
 
-const gameQueue = new GameQueue();
-gameQueue.start(process.env.TOKEN);
+const bot = new OpenInvite();
+bot.start(process.env.TOKEN);
 

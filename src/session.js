@@ -33,6 +33,7 @@ class Session {
     Logger.info(`${this.end.name}, host=${this.host.tag}`);
     this.embedMessage.edit(this.createEmbed(true));
 
+    // Remove the join button.
     const joinButtonReaction = this.embedMessage.reactions.cache.get(Session.joinButton);
     if (joinButtonReaction !== undefined) {
       joinButtonReaction.remove()
@@ -40,6 +41,7 @@ class Session {
         .catch(error => Logger.error(`${this.end.name}, host=${this.host.tag}. Failed to remove joinButton: ${error}`));
     }
 
+    // Remove the leave button.
     const leaveButtonReaction = this.embedMessage.reactions.cache.get(Session.leaveButton);
     if (leaveButtonReaction !== undefined) {
       leaveButtonReaction.remove()
@@ -189,7 +191,7 @@ class Session {
         .setThumbnail(this.host.displayAvatarURL())
         .addField("Host", `<@${this.host.id}>`)
         .addFields(
-          { name: "Playing", value: this.constructFieldString(isEnded) }
+          { name: "Connected", value: this.constructFieldString(isEnded) }
         )
         .setTimestamp()
         .setFooter("SESSION ENDED");
@@ -200,7 +202,7 @@ class Session {
         .setThumbnail(this.host.displayAvatarURL())
         .addField("Host", `<@${this.host.id}>`)
         .addFields(
-          { name: "Playing", value: this.constructFieldString(isEnded) }
+          { name: "Connected", value: this.constructFieldString(isEnded) }
         )
         .setTimestamp(this.startTime)
         .setFooter(`${Session.joinButton} to join. ${Session.leaveButton} to leave.`);
