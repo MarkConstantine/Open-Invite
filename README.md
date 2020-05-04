@@ -9,8 +9,8 @@ A Discord bot for creating an open invite to anything (games, events, etc.) for 
 | How To                                                                              | Command                                        |
 | ------------------------------------------------------------------------------------| ---------------------------------------------- |
 | Print available commands                                                            | !help                                          |
-| Start a Session                                                                     | !start [NUMBER_OF_USERS] "TITLE"               |
-| End your Session (deactivates the session but keeps it in the channel's history)    | !end                                           |
+| Start a session                                                                     | !start [NUMBER_OF_USERS] "TITLE"               |
+| End your session (deactivates the session but keeps it in the channel's history)    | !end                                           |
 | Cancel your session (removes the session from the channel's history)                | !cancel                                        |
 | Add users to your session (users could also join by reacting with 👍)               | !add @username @username ...                   |
 | Remove users from your session (users could also leave by reacting with ✋)         | !remove @username @username ...                |
