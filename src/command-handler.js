@@ -277,7 +277,11 @@ class CommandHandler {
    * @param {User} host The sender of the command.
    */
   handleRollDiceCommand(message, command, host) {
-    const sides = command.match(/\d+/g)[0];
+    let sides = 6;
+    const matches = command.match(/\d+/g);
+    if (matches !== null) {
+      sides = parseInt(matches[0]);
+    }
 
     if (sides <= 0) {
       message.reply("The number of sides must be 1 or more.");
