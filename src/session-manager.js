@@ -109,6 +109,9 @@ class SessionManager {
     message.delete(); // Clear the caller's command.
     const newSession = new Session(message, host, sessionSize, title);
     this.setSession(host, newSession);
+
+    // Connecting the host by default.
+    newSession.addUsers([host]);
   }
 
   /**
