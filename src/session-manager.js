@@ -13,7 +13,7 @@ class SessionManager {
     MAX_SESSION_SIZE: 50,
     MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours
     CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hours
-    DEFAULT_SESSION_SIZE: 5,
+    DEFAULT_SESSION_SIZE: 4,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
     this.discordBot = discordBot;
@@ -109,9 +109,6 @@ class SessionManager {
     message.delete(); // Clear the caller's command.
     const newSession = new Session(message, host, sessionSize, title);
     this.setSession(host, newSession);
-
-    // Connecting the host by default.
-    newSession.addUsers([host]);
   }
 
   /**
