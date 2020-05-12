@@ -76,39 +76,40 @@ class CommandHandler {
    */
   handle(message) {
     const command = message.content;
+    const check = message.content.toLowerCase();
     const host = message.author;
 
-    if (command.startsWith(CommandHandler.COMMANDS.HELP))
+    if (check.startsWith(CommandHandler.COMMANDS.HELP))
       this.handleHelpCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.START))
+    if (check.startsWith(CommandHandler.COMMANDS.START))
       this.handleStartCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.END))
+    if (check.startsWith(CommandHandler.COMMANDS.END))
       this.handleEndCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
+    if (check.startsWith(CommandHandler.COMMANDS.CANCEL))
       this.handleCancelCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ADD))
+    if (check.startsWith(CommandHandler.COMMANDS.ADD))
       this.handleAddCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.REMOVE))
+    if (check.startsWith(CommandHandler.COMMANDS.REMOVE))
       this.handleRemoveCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.RESIZE))
+    if (check.startsWith(CommandHandler.COMMANDS.RESIZE))
       this.handleResizeCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.RENAME))
+    if (check.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ADVERTISE))
+    if (check.startsWith(CommandHandler.COMMANDS.ADVERTISE))
       this.handleAdvertiseCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.COINFLIP))
+    if (check.startsWith(CommandHandler.COMMANDS.COINFLIP))
       this.handleCoinFlipCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ROLLDICE))
+    if (check.startsWith(CommandHandler.COMMANDS.ROLLDICE))
       this.handleRollDiceCommand(message, command, host);
 
     // Do nothing if command not recognized.
