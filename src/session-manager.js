@@ -334,6 +334,17 @@ class SessionManager {
     // If we couldn't match the reaction's message id with a session's embed message id,
     // then the reaction was for some unrelated message. Thus we ignore it.
   }
+
+  randomizeTeams(message, host, numberOfTeams = 2) {
+    if (!this.hasSession(host)) {
+      Logger.error(`${this.randomizeTeams.name}, host=${host.tag}. User does not have an active session.`);
+      message.reply("You have no active sessions?");
+      return;
+    }
+    message.delete(); // Clear the caller's command.
+    const session = this.getSessionFromUserId(host.id);
+    session.randomizeTeams(numberOfTeams);
+  }
 }
 
 module.exports = SessionManager;

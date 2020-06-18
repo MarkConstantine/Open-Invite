@@ -17,6 +17,7 @@ class CommandHandler {
     ADVERTISE:    "!advertise",
     COINFLIP:     "!coinflip",
     ROLLDICE:     "!rolldice",
+    TEAMS:        "!teams",
   };
 
   static HELP_MESSAGE = [
@@ -63,6 +64,10 @@ class CommandHandler {
     {
       name: `Roll a dice with any number of sides`,
       value: `${CommandHandler.COMMANDS.ROLLDICE} [NUMBER_OF_SIDES]`,
+    },
+    {
+      name: `Randomly assign your session's users into the specified number of teams`,
+      value: `${CommandHandler.COMMANDS.TEAMS} [NUMBER_OF_TEAMS]`,
     },
   ];
 
@@ -111,6 +116,9 @@ class CommandHandler {
 
     if (check.startsWith(CommandHandler.COMMANDS.ROLLDICE))
       this.handleRollDiceCommand(message, command, host);
+
+    if (check.startsWith(CommandHandler.COMMANDS.TEAMS))
+      this.handleTeamsCommand(message, command, host);
 
     // Do nothing if command not recognized.
   }
@@ -292,6 +300,28 @@ class CommandHandler {
     const result = Math.floor(Math.random() * sides) + 1;
     Logger.info(`Rolldice ${result} from ${host.tag}: ${command}`);
     message.reply(result);
+  }
+
+  /**
+   * Randomly assign your session's users into the specified number of teams
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent. 
+   * @param {User} host The sender of the command.
+   */
+  handleTeamsCommand(message, command, host) {
+    Logger.info(`Teams from ${host.tag}: ${command}`);
+    let numberOfTeams = 2;
+    const matches = command.match(/\d+/g);
+    if (matches !== null) {
+      numberOfTeams = parseInt(matches[0]);
+    }
+
+    if (numberOfTeams <= 1) {
+      message.reply("Number of teams should be 2 or more.");
+      return;
+    }
+
+    this.sessionManager.randomizeTeams(message, host, numberOfTeams);
   }
 }
 

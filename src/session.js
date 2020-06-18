@@ -2,10 +2,26 @@
 const Logger = require("./logger.js")(module);
 const { MessageEmbed } = require("discord.js");
 
+function shuffleArray(array) {
+  for(let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * i);
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
+
 /** Class representing an active session message. */
 class Session {
   static joinButton = "👍";
   static leaveButton = "✋";
+
+  static STATES = {
+    ACTIVE:         "ACTIVE",
+    ENDED:          "ENDED",
+    TEAMS_ACTIVE:   "TEAMS_ACTIVE",
+    TEAMS_ENDED:    "TEAMS_ENDED",
+  };
 
   /**
    * Create a new Session on the text channel provided by the message parameter.
@@ -22,6 +38,9 @@ class Session {
     this.connected = 0;
     this.embedColor = Math.floor(Math.random() * 0xFFFFFF);
     this.startTime = new Date();
+    this.state = Session.STATES.ACTIVE;
+    this.numberOfTeams = 2;
+    this.teamSize = Math.floor(userCount / this.numberOfTeams);
     this.sendEmbedMessage();
   }
 
@@ -31,7 +50,8 @@ class Session {
    */
   end() {
     Logger.info(`${this.end.name}, host=${this.host.tag}`);
-    this.embedMessage.edit(this.createEmbed(true));
+    this.state = (this.state === Session.STATES.TEAMS_ACTIVE) ? Session.STATES.TEAMS_ENDED : Session.STATES.ENDED;
+    this.embedMessage.edit(this.createEmbed(this.state));
 
     // Remove the join button.
     const joinButtonReaction = this.embedMessage.reactions.cache.get(Session.joinButton);
@@ -147,6 +167,18 @@ class Session {
   }
 
   /**
+   * Randomly assign your session's users into the specified number of teams.
+   * @param {number} numberOfTeams The specified number of teams.
+   */
+  randomizeTeams(numberOfTeams) {
+    this.state = Session.STATES.TEAMS_ACTIVE;
+    this.numberOfTeams = numberOfTeams;
+    this.teamSize = Math.floor(this.users.length / this.numberOfTeams);
+    shuffleArray(this.users);
+    this.update();
+  }
+
+  /**
    * Determine if the session has the following user connected.
    * @param {User} userToSearch The user to search for.
    * @returns {boolean} True if the user is connected to the session. False otherwise.
@@ -159,54 +191,83 @@ class Session {
 
   /**
    * Returns the field string of all connected users in the session.
-   * @param {boolean} isEnded Set to true to generate the field string for an ended session. False otherwise.
+   * @param {Session.STATES} sessionState State of the session to display.
+   * @param {number} teamSize Number of users to stop at for this field string.
+   * @param {number} userStartIndex The starting index when looping through the users array.
    * @returns {string} A string of connected users to go into the MessageEmbed.
    */
-  constructFieldString(isEnded = false) {
+  constructFieldString(sessionState = Session.STATES.ACTIVE, teamSize = this.users.length, userStartIndex = 0) {
     let fieldString = "";
-    for (let i = 0; i < this.users.length; i++) {
+    for (let i = userStartIndex; i < userStartIndex + teamSize; i++) {
       const user = this.users[i];
+      const closedOrOpen = (sessionState === Session.STATES.ENDED || sessionState === Session.STATES.TEAMS_ENDED) ? "CLOSED SLOT" : "OPEN SLOT";
       const newLine = (i === this.users.length - 1) ? "" : "\n"; // Don't newline the last element.
-      if (isEnded) {
-        fieldString += `${i + 1}. ${user === undefined ? "CLOSED SLOT" : user}${newLine}`;
-      } else {
-        fieldString += `${i + 1}. ${user === undefined ? "OPEN SLOT" : user}${newLine}`;
-      }
+      fieldString += `${i + 1}. ${user === undefined ? closedOrOpen : user}${newLine}`;
     }
-    Logger.info(`${this.constructFieldString.name}, host=${this.host.tag}, fieldString=\n${fieldString}`);
+    Logger.info(`${this.constructFieldString.name}, host=${this.host.tag}, fieldString=\n${fieldString}, teamSize=${teamSize}, userStartIndex=${userStartIndex}`);
     return fieldString;
   }
 
   /**
+   * Create the body of the session for the message embed.
+   * @param {Session.STATES} sessionState State of the session to display.
+   */
+  constructSessionBody(sessionState = Session.STATES.ACTIVE) {
+    const fields = [];
+    
+    switch (sessionState) {
+      case Session.STATES.ACTIVE:
+      case Session.STATES.ENDED:
+        fields.push({
+          name: "Connected",
+          value: this.constructFieldString(sessionState)
+        });
+        return fields;
+      case Session.STATES.TEAMS_ACTIVE:
+      case Session.STATES.TEAMS_ENDED:
+        for (let i = 0; i < this.numberOfTeams; i++) {
+          fields.push({
+            name: `Team ${i + 1}`,
+            value: this.constructFieldString(sessionState, this.teamSize, i * this.teamSize)
+          });
+        }
+        return fields;
+      default:
+        Logger.error(`${this.createEmbed.name}, host=${this.host.tag}, Unknown sessionState=${sessionState}`);
+    }
+  }
+
+  /**
    * Create the MessageEmbed to be sent to Discord.
-   * @param {boolean} isEnded Set to true if the session has ended. False otherwise.
+   * @param {Session.STATES} sessionState State of the session to display.
    * @returns {MessageEmbed} The MessageEmbed to be sent to Discord.
    */
-  createEmbed(isEnded = false) {
-    Logger.info(`${this.createEmbed.name}, host=${this.host.tag}, isEnded=${isEnded}`);
-    if (isEnded) {
-      return new MessageEmbed()
-        .setColor(this.embedColor)
-        .setTitle(this.title)
-        .setThumbnail(this.host.displayAvatarURL())
-        .addField("Host", `<@${this.host.id}>`)
-        .addFields(
-          { name: "Connected", value: this.constructFieldString(isEnded) }
-        )
-        .setTimestamp()
-        .setFooter("SESSION ENDED");
-    } else {
-      return new MessageEmbed()
-        .setColor(this.embedColor)
-        .setTitle(this.title)
-        .setThumbnail(this.host.displayAvatarURL())
-        .addField("Host", `<@${this.host.id}>`)
-        .addFields(
-          { name: "Connected", value: this.constructFieldString(isEnded) }
-        )
-        .setTimestamp(this.startTime)
-        .setFooter(`${Session.joinButton} to join. ${Session.leaveButton} to leave.`);
+  createEmbed(sessionState = Session.STATES.ACTIVE) {
+    Logger.info(`${this.createEmbed.name}, host=${this.host.tag}, sessionState=${sessionState}`);
+    
+    const embed = new MessageEmbed()
+      .setColor(this.embedColor)
+      .setTitle(this.title)
+      .setThumbnail(this.host.displayAvatarURL())
+      .addField("Host", `<@${this.host.id}>`)
+      .addFields(this.constructSessionBody(sessionState));
+    
+    switch (sessionState) {
+      case Session.STATES.ACTIVE:
+      case Session.STATES.TEAMS_ACTIVE:
+        embed.setFooter(`${Session.joinButton} to join. ${Session.leaveButton} to leave.`);
+        embed.setTimestamp(this.startTime);
+        break;
+      case Session.STATES.ENDED:
+      case Session.STATES.TEAMS_ENDED:
+        embed.setFooter("SESSION ENDED");
+        embed.setTimestamp();
+        break;
+      default:
+        Logger.error(`${this.createEmbed.name}, host=${this.host.tag}, Unknown sessionState=${sessionState}`);
     }
+
+    return embed;
   }
 
   /**
@@ -214,7 +275,7 @@ class Session {
    */
   sendEmbedMessage() {
     // Create a new embed message on discord.
-    this.message.channel.send(this.createEmbed())
+    this.message.channel.send(this.createEmbed(this.state))
       .then(embedMessage => {
         Logger.info(`${this.sendEmbedMessage.name}, host=${this.host.tag}. New MessageEmbed with ID=${embedMessage.id}`);
         // Save the message response to update later.
