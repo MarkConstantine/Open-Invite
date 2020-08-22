@@ -10,13 +10,6 @@ class DiscordBot extends Client {
       Logger.info(`Logged in as ${this.user.tag}`);
     });
 
-    this.on("guildCreate", guild => {
-      Logger.info(`guildCreate, This bot was added to guild: ${guild.name}`);
-      guild.members.fetch()
-        .then(Logger.info("Updated user cache"))
-        .catch(error => Logger.error(`Error fetching members on guildCreate: ${error}`));
-    });
-
     this.on("guildMemberAdd", member => {
       Logger.info(`guildMemberAdd, ${member.user.username}(ID=${member.id}) joined ${member.guild.name}`);
       member.fetch()
@@ -25,8 +18,8 @@ class DiscordBot extends Client {
     });
   }
 
-  start(token) {
-    this.login(token);
+  getConnectedServers() {
+    return this.guilds.cache;
   }
 
   getUser(usernameOrMention) {
