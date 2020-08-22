@@ -41,6 +41,7 @@ class Session {
     this.state = Session.STATES.ACTIVE;
     this.numberOfTeams = 2;
     this.teamSize = Math.floor(userCount / this.numberOfTeams);
+    this.isReady = false;
     this.sendEmbedMessage();
   }
 
@@ -274,24 +275,49 @@ class Session {
    * Send the session's info as an Embed Message.
    */
   sendEmbedMessage() {
+    this.isReady = false;
+
     // Create a new embed message on discord.
     this.message.channel.send(this.createEmbed(this.state))
       .then(embedMessage => {
-        Logger.info(`${this.sendEmbedMessage.name}, host=${this.host.tag}. New MessageEmbed with ID=${embedMessage.id}`);
+        if (this.embedMessage !== undefined) {
+          Logger.info(`${this.sendEmbedMessage.name}, host=${this.host.tag}, OldMessageEmbed=${this.embedMessage.id}`);
+        }
+
+        Logger.info(`${this.sendEmbedMessage.name}, host=${this.host.tag}, NewMessageEmbed=${embedMessage.id}`);
+
         // Save the message response to update later.
         this.embedMessage = embedMessage;
 
         // Create the join button.
         this.embedMessage
           .react(Session.joinButton)
-          .catch(`Failed to create the join button for MessageEmbed with ID=${embedMessage.id}`);
+          .catch(error =>
+            Logger.error(`${this.sendEmbedMessage.name}, host=${this.host.tag}, embedMessage=${this.embedMessage.id}. `
+              + `Failed to react ${Session.joinButton}, ${error}`));
 
         // Create the leave button.
         this.embedMessage
           .react(Session.leaveButton)
-          .catch(`Failed to create the leave button for MessageEmbed with ID=${embedMessage.id}`);
+          .then(_ => this.isReady = true)
+          .catch(error =>
+            Logger.error(`${this.sendEmbedMessage.name}, host=${this.host.tag}, embedMessage=${this.embedMessage.id}. `
+              + `Failed to react ${Session.leaveButton}, ${error}`));
       })
       .catch(error => Logger.error(`${this.sendEmbedMessage.name}, ${error}`));
+
+  }
+
+  /**
+   * Get the Session's Embed Message ID.
+   * @returns 0 if the Embed Message does not exist.
+   */
+  getEmbedMessageId() {
+    if (this.embedMessage === undefined) {
+      Logger.error(`${this.getEmbedMessageId.name}, ${this.host.tag}. embedMessage was undefined`);
+      return 0;
+    }
+    return this.embedMessage.id;
   }
 
   /**
@@ -302,7 +328,9 @@ class Session {
     Logger.info(`${this.update.name}, host=${this.host.tag}`);
     if (this.embedMessage !== undefined) {
       Logger.info(`${this.update.name}, Deleting old MessageEmbed with ID=${this.embedMessage.id}`);
-      this.embedMessage.delete();
+      this.embedMessage
+        .delete()
+        .catch(error => Logger.error(`${this.update.name}, ${this.host.tag}. ${error}`));
     }
     this.sendEmbedMessage();
   }

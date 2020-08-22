@@ -282,7 +282,8 @@ class SessionManager {
    * @param {User} user The user who made the reaction.
    */
   handleReactionButtons(reaction, user) {
-    Logger.info(`${this.handleReactionButtons.name}, User ${user.tag} reacted with ${reaction.emoji.name}`);
+    Logger.info(`${this.handleReactionButtons.name}, ${user.tag} reacted with ${reaction.emoji.name} `
+      + `to message ${reaction.message.id}`);
 
     if (reaction.emoji.name === Session.joinButton) {
       this.addUserToSessionFromReaction(reaction, user);
@@ -306,7 +307,13 @@ class SessionManager {
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
       // Don't do anything if the user is already connected.
-      if (session.embedMessage.id === reaction.message.id && !session.isUserConnected(user)) {
+      if (session.getEmbedMessageId() === reaction.message.id && !session.isUserConnected(user)) {
+
+        if (!session.isReady) {
+          Logger.info(`${this.addUserToSessionFromReaction.name}. Session not ready`);
+          break;
+        }
+
         session.addUsers([user]); // Ignoring return value.
         break;
       }
@@ -327,7 +334,13 @@ class SessionManager {
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
       // Don't do anything if the user is not connected.
-      if (session.embedMessage.id === reaction.message.id && session.isUserConnected(user)) {
+      if (session.getEmbedMessageId() === reaction.message.id && session.isUserConnected(user)) {
+
+        if (!session.isReady) {
+          Logger.info(`${this.removeUserFromSessionFromReaction.name}. Session not ready`);
+          break;
+        }
+
         session.removeUsers([user]); // Ignoring return value
         break;
       }
