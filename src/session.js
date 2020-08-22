@@ -3,7 +3,7 @@ const Logger = require("./logger.js")(module);
 const { MessageEmbed } = require("discord.js");
 
 function shuffleArray(array) {
-  for(let i = array.length - 1; i > 0; i--) {
+  for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * i);
     const temp = array[i];
     array[i] = array[j];
@@ -17,16 +17,16 @@ class Session {
   static leaveButton = "✋";
 
   static STATES = {
-    ACTIVE:         "ACTIVE",
-    ENDED:          "ENDED",
-    TEAMS_ACTIVE:   "TEAMS_ACTIVE",
-    TEAMS_ENDED:    "TEAMS_ENDED",
+    ACTIVE: "ACTIVE",
+    ENDED: "ENDED",
+    TEAMS_ACTIVE: "TEAMS_ACTIVE",
+    TEAMS_ENDED: "TEAMS_ENDED",
   };
 
   /**
    * Create a new Session on the text channel provided by the message parameter.
    * @param {Message} message The command message used to create this session.
-   * @param {User} host The user that is hosting this session. 
+   * @param {User} host The user that is hosting this session.
    * @param {number} userCount The number of users that can connect to this session.
    * @param {string} title The title of the session.
    */
@@ -45,7 +45,7 @@ class Session {
   }
 
   /**
-   * Update the existing Discord embed message to indicate that 
+   * Update the existing Discord embed message to indicate that
    * the Session has ended.
    */
   end() {
@@ -84,7 +84,7 @@ class Session {
    * @returns {Users[]} A list of users that were not added to the session
    */
   addUsers(usersToAdd) {
-    const usersNotAdded = [];    
+    const usersNotAdded = [];
 
     for (const user of usersToAdd) {
       const openSlotIndex = this.users.indexOf(undefined);
@@ -102,14 +102,14 @@ class Session {
         this.connected += 1;
       }
     }
-    
+
     this.update();
     return usersNotAdded;
   }
 
   /**
    * Removes a list of Discord users from the session.
-   * @param {Users[]} usersToRemove List of users to remove from the session. 
+   * @param {Users[]} usersToRemove List of users to remove from the session.
    * @returns {Users[]} A list of users that were not removed from the session.
    */
   removeUsers(usersToRemove) {
@@ -120,7 +120,7 @@ class Session {
       if (userIndex === -1) {
         Logger.error(`${this.removeUsers.name}, host=${this.host.tag}, ${removeUser.tag} is not connected`);
         usersNotRemoved.push(removeUser); // Could not remove.
-      } 
+      }
       else {
         Logger.info(`${this.removeUsers.name}, host=${this.host.tag}, removeUser=${this.users[userIndex].tag}(ID=${this.users[userIndex].id})`);
         this.users[userIndex] = undefined;
@@ -143,7 +143,7 @@ class Session {
       Logger.error(`${this.resize.name}, host=${this.host.tag}. Cannot resize to ${newUserCount}. There's ${this.connected} connected user(s).`);
       return false;
     }
-    
+
     let newArray = new Array(newUserCount).fill(undefined);
     for (let i = 0; i < this.users.length; i++) {
       const user = this.users[i];
@@ -214,7 +214,7 @@ class Session {
    */
   constructSessionBody(sessionState = Session.STATES.ACTIVE) {
     const fields = [];
-    
+
     switch (sessionState) {
       case Session.STATES.ACTIVE:
       case Session.STATES.ENDED:
@@ -244,14 +244,14 @@ class Session {
    */
   createEmbed(sessionState = Session.STATES.ACTIVE) {
     Logger.info(`${this.createEmbed.name}, host=${this.host.tag}, sessionState=${sessionState}`);
-    
+
     const embed = new MessageEmbed()
       .setColor(this.embedColor)
       .setTitle(this.title)
       .setThumbnail(this.host.displayAvatarURL())
       .addField("Host", `<@${this.host.id}>`)
       .addFields(this.constructSessionBody(sessionState));
-    
+
     switch (sessionState) {
       case Session.STATES.ACTIVE:
       case Session.STATES.TEAMS_ACTIVE:
@@ -280,12 +280,16 @@ class Session {
         Logger.info(`${this.sendEmbedMessage.name}, host=${this.host.tag}. New MessageEmbed with ID=${embedMessage.id}`);
         // Save the message response to update later.
         this.embedMessage = embedMessage;
-        
+
         // Create the join button.
-        this.embedMessage.react(Session.joinButton);
+        this.embedMessage
+          .react(Session.joinButton)
+          .catch(`Failed to create the join button for MessageEmbed with ID=${embedMessage.id}`);
 
         // Create the leave button.
-        this.embedMessage.react(Session.leaveButton);
+        this.embedMessage
+          .react(Session.leaveButton)
+          .catch(`Failed to create the leave button for MessageEmbed with ID=${embedMessage.id}`);
       })
       .catch(error => Logger.error(`${this.sendEmbedMessage.name}, ${error}`));
   }
@@ -294,7 +298,7 @@ class Session {
    * Updates the session info by deleting the old embed and
    * creating a new embed message.
    */
-  update() {    
+  update() {
     Logger.info(`${this.update.name}, host=${this.host.tag}`);
     if (this.embedMessage !== undefined) {
       Logger.info(`${this.update.name}, Deleting old MessageEmbed with ID=${this.embedMessage.id}`);

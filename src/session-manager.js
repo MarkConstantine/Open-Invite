@@ -87,7 +87,7 @@ class SessionManager {
    * Start a session for the provided user.
    * @param {Message} message The original message to respond to if any issues occur.
    * @param {User} host The owner of the session to start.
-   * @param {string} title The title of the session. 
+   * @param {string} title The title of the session.
    * @param {number} sessionSize The amount of open slots for the session.
    */
   startSession(message, host, title = this.config.DEFAULT_TITLE, sessionSize = this.config.DEFAULT_SESSION_SIZE) {
@@ -272,16 +272,18 @@ class SessionManager {
         session.end();
         this.deleteSessionFromUserId(hostId);
       }
-    }    
+    }
     Logger.info(`${this.cleanupOldSessions.name}, Ending cleanup routine`);
   }
 
   /**
    * Determine if a user's reaction is a reaction button used for this bot.
    * @param {MessageReaction} reaction The reaction message to check.
-   * @param {User} user The user who made the reaction. 
+   * @param {User} user The user who made the reaction.
    */
   handleReactionButtons(reaction, user) {
+    Logger.info(`${this.handleReactionButtons.name}, User ${user.tag} reacted with ${reaction.emoji.name}`);
+
     if (reaction.emoji.name === Session.joinButton) {
       this.addUserToSessionFromReaction(reaction, user);
     }
@@ -295,7 +297,7 @@ class SessionManager {
 
   /**
    * Add the user to the appropriate session if they reacted with the join button.
-   * @param {MessageReaction} reaction The reaction message to check. 
+   * @param {MessageReaction} reaction The reaction message to check.
    * @param {User} user The user who made the reaction.
    */
   addUserToSessionFromReaction(reaction, user) {
