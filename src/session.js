@@ -52,7 +52,10 @@ class Session {
   end() {
     Logger.info(`${this.end.name}, host=${this.host.tag}`);
     this.state = (this.state === Session.STATES.TEAMS_ACTIVE) ? Session.STATES.TEAMS_ENDED : Session.STATES.ENDED;
-    this.embedMessage.edit(this.createEmbed(this.state));
+    this.embedMessage
+      .edit(this.createEmbed(this.state))
+      .catch(error => Logger.error(`${this.end.name}, host=${this.host.tag}. `
+        + `Failed to edit MessageEmbed=${this.embedMessage}: ${error}`));
 
     // Remove the join button.
     const joinButtonReaction = this.embedMessage.reactions.cache.get(Session.joinButton);
@@ -299,7 +302,7 @@ class Session {
         // Create the leave button.
         this.embedMessage
           .react(Session.leaveButton)
-          .then(_ => this.isReady = true)
+          .then(_ => this.isReady = true) // Ready only after the bot sends the leave button reaction.
           .catch(error =>
             Logger.error(`${this.sendEmbedMessage.name}, host=${this.host.tag}, embedMessage=${this.embedMessage.id}. `
               + `Failed to react ${Session.leaveButton}, ${error}`));

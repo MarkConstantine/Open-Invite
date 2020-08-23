@@ -12,6 +12,10 @@ class OpenInvite {
     this.discordBot = new DiscordBot();
     this.myGuilds = {};
 
+    ["SIGINT", "uncaughtException"].forEach((eventType) => {
+      process.on(eventType, this.stop.bind(this, eventType));
+    })
+
     this.discordBot.on("guildCreate", guild => {
       Logger.info(`guildCreate, ${this.botName} was added to guild: ${guild.name}`);
       this.addNewGuild(guild);
@@ -41,8 +45,6 @@ class OpenInvite {
 
     if (sessionManager === undefined) {
       Logger.error(`Could not find a session manager for guild=${guild.id}`);
-    } else {
-      Logger.info(`Found a session manager for guild=${guild.id}`);
     }
 
     return sessionManager;
@@ -53,8 +55,6 @@ class OpenInvite {
 
     if (commandHandler === undefined) {
       Logger.error(`Could not find a command handler for guild=${guild.id}`);
-    } else {
-      Logger.info(`Found a command handler for guild=${guild.id}`);
     }
 
     return commandHandler;
@@ -74,6 +74,25 @@ class OpenInvite {
         Logger.error(`Failed to login. ${error}`);
         process.exit();
       });
+  }
+
+  stop(eventType) {
+    Logger.info(`Stopping ${this.botName} (Reason=${eventType})`);
+
+    for (const [guildId, commandHandler] of Object.entries(this.myGuilds)) {
+      Logger.info(`Ending all sessions in guild=${guildId}`);
+      commandHandler.sessionManager.endAllSessions();
+    }
+
+    const sleep = (milliseconds) => {
+      return new Promise(resolve => setTimeout(resolve, milliseconds))
+    };
+
+    // Sleeping before exiting to make sure all exit-related API requests go through.
+    // Not the best solution but it works. ¯\_(ツ)_/¯
+    sleep(5000).then(_ => {
+      process.exit();
+    });
   }
 }
 

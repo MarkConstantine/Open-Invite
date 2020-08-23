@@ -129,6 +129,17 @@ class SessionManager {
   }
 
   /**
+   * Forcefully end all sessions registered under this SessionManager.
+   */
+  endAllSessions() {
+    for (const [hostId, session] of Object.entries(this.sessions)) {
+      Logger.info(`${this.endAllSessions.name}. Ending session from host=${hostId}`);
+      session.end();
+      this.deleteSessionFromUserId(hostId);
+    }
+  }
+
+  /**
    * Cancel a session for the provided user.
    * @param {Message} message The original message to respond to if any issues occur.
    * @param {User} host The owner of the session to cancel.
