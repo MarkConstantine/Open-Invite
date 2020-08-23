@@ -9,17 +9,16 @@ class SessionManager {
    * @param {DiscordBot} discordBot Dependency for performing Discord specific operations.
    * @param {*} config Object containing various configurations for the SessionManager.
    */
-  constructor(discordBot, config = {
+  constructor(discordBot, guild, config = {
     MAX_SESSION_SIZE: 50,
-    MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours
-    CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hours
+    MIN_SESSION_LIFETIME_MS: 1 * 60 * 60 * 1000, // 1 Hour
     DEFAULT_SESSION_SIZE: 4,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
     this.discordBot = discordBot;
+    this.guild = guild;
     this.config = config;
     this.sessions = {};
-    setInterval(() => this.cleanupOldSessions(), this.config.CLEANUP_INTERVAL_MS);
   }
 
   /**
@@ -271,20 +270,31 @@ class SessionManager {
   }
 
   /**
-   * End any dormant sessions that have existed longer than the configurable MAX_SESSION_DURATION_MS.
+   * Manually end any session in which none of its users are connected to a voice channel.
+   * A session must be active for atleast MIN_SESSION_LIFETIME_MS before it is to be considered.
    */
-  cleanupOldSessions() {
-    Logger.info(`${this.cleanupOldSessions.name}, Starting cleanup routine`);
+  tryCleanupOldSessions() {
+    Logger.info(`${this.tryCleanupOldSessions.name}, Starting cleanup routine`);
     const now = new Date();
     for (const [hostId, session] of Object.entries(this.sessions)) {
-      const compare = new Date(session.startTime.getTime() + this.config.MAX_SESSION_DURATION_MS);
-      if (now >= compare) {
+      const compare = new Date(session.startTime.getTime() + this.config.MIN_SESSION_LIFETIME_MS);
+      if (now < compare) continue; // Session is not active for long enough.
+
+      const usersConnectedToVoice = this.discordBot.getUsersConnectedToVoiceInGuild(this.guild);
+      const sessionUsers = session.users;
+
+      const sessionUsersStillConnectedToVoice
+        = usersConnectedToVoice.filter(user => sessionUsers.includes(user.id) || user.id === session.host.id);
+
+      Logger.debug(`${this.tryCleanupOldSessions.name}, sessionUsersStillConnectedToVoice=${sessionUsersStillConnectedToVoice}`);
+
+      if (sessionUsersStillConnectedToVoice.length === 0) {
         Logger.info(`Session marked for cleanup from user: ${hostId}`);
         session.end();
         this.deleteSessionFromUserId(hostId);
       }
     }
-    Logger.info(`${this.cleanupOldSessions.name}, Ending cleanup routine`);
+    Logger.info(`${this.tryCleanupOldSessions.name}, Ending cleanup routine`);
   }
 
   /**

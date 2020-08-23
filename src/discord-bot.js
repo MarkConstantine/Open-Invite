@@ -34,6 +34,17 @@ class DiscordBot extends Client {
       );
     }
   }
+
+  getUsersConnectedToVoiceInGuild(guild) {
+    let result = [];
+    const voiceChannels = guild.channels.cache.filter(channel => channel.type === "voice");
+
+    voiceChannels.forEach(voiceChannel => {
+      voiceChannel.members.forEach(member => result.push(member.user));
+    });
+
+    return result;
+  }
 }
 
 module.exports = DiscordBot;

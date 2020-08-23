@@ -33,11 +33,18 @@ class OpenInvite {
       if (user.username === this.botName) return;
       this.getGuildSessionManager(reaction.message.guild).handleReactionButtons(reaction, user);
     });
+
+    this.discordBot.on("voiceStateUpdate", (oldMember, newMember) => {
+      if (newMember.channel === null) {
+        Logger.info(`Client ${newMember.id} disconnected from a voice channel.`);
+        this.getGuildSessionManager(newMember.guild).tryCleanupOldSessions();
+      }
+    });
   }
 
   addNewGuild(guild) {
     Logger.info(`Adding server ${guild.id}. Creating new CommandHandler and SessionManager`);
-    this.myGuilds[guild.id] = new CommandHandler(new SessionManager(this.discordBot));
+    this.myGuilds[guild.id] = new CommandHandler(new SessionManager(this.discordBot, guild));
   }
 
   getGuildSessionManager(guild) {
@@ -90,7 +97,9 @@ class OpenInvite {
 
     // Sleeping before exiting to make sure all exit-related API requests go through.
     // Not the best solution but it works. ¯\_(ツ)_/¯
+    Logger.info("Sleeping...");
     sleep(5000).then(_ => {
+      Logger.info("Exiting...");
       process.exit();
     });
   }
