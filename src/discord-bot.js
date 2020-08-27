@@ -22,17 +22,20 @@ class DiscordBot extends Client {
     return this.guilds.cache;
   }
 
-  getUser(usernameOrMention) {
-    if (usernameOrMention.startsWith("<@!")) {
-      // Is mention.
-      const id = usernameOrMention.match(/\d+/g)[0];
+  getUser(username) {
+    // Mentions: <@!userId>
+    if (username.startsWith("<@!")) {
+      const id = username.match(/\d+/g)[0];
       return this.users.cache.find((user) => user.id === id);
-    } else {
-      // Is username.
-      return this.users.cache.find(
-        (user) => user.username === usernameOrMention
-      );
     }
+
+    // Tags: username#TAG
+    if (username.includes("#")) {
+      return this.users.cache.find((user) => user.tag == username);
+    }
+
+    // Only username
+    return this.users.cache.find((user) => user.username === username);
   }
 
   getUsersConnectedToVoiceInGuild(guild) {
