@@ -175,7 +175,7 @@ class Session {
    * @param {number} numberOfTeams The specified number of teams.
    */
   randomizeTeams(numberOfTeams) {
-    this.state = Session.STATES.TEAMS_ACTIVE;
+    this.state = (numberOfTeams >= 2) ? Session.STATES.TEAMS_ACTIVE : Session.STATES.ACTIVE;
     this.numberOfTeams = numberOfTeams;
     this.teamSize = Math.floor(this.users.length / this.numberOfTeams);
     shuffleArray(this.users);
@@ -204,11 +204,14 @@ class Session {
     let fieldString = "";
     for (let i = userStartIndex; i < userStartIndex + teamSize; i++) {
       const user = this.users[i];
-      const closedOrOpen = (sessionState === Session.STATES.ENDED || sessionState === Session.STATES.TEAMS_ENDED) ? "CLOSED SLOT" : "OPEN SLOT";
+      const closedOrOpen = (sessionState === Session.STATES.ENDED || sessionState === Session.STATES.TEAMS_ENDED)
+        ? "CLOSED SLOT"
+        : "OPEN SLOT";
       const newLine = (i === this.users.length - 1) ? "" : "\n"; // Don't newline the last element.
       fieldString += `${i + 1}. ${user === undefined ? closedOrOpen : user}${newLine}`;
     }
-    Logger.info(`${this.constructFieldString.name}, host=${this.host.tag}, fieldString=\n${fieldString}, teamSize=${teamSize}, userStartIndex=${userStartIndex}`);
+    Logger.info(`${this.constructFieldString.name}, host=${this.host.tag}, `
+      + `fieldString=\n${fieldString}, teamSize=${teamSize}, userStartIndex=${userStartIndex}`);
     return fieldString;
   }
 

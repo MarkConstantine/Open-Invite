@@ -36,7 +36,7 @@ class OpenInvite {
 
     this.discordBot.on("voiceStateUpdate", (oldMember, newMember) => {
       if (newMember.channel === null) {
-        Logger.info(`Client ${newMember.id} disconnected from a voice channel.`);
+        Logger.debug(`Client ${newMember.id} disconnected from a voice channel.`);
         this.getGuildSessionManager(newMember.guild).tryCleanupOldSessions();
       }
     });

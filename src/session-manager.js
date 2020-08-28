@@ -326,7 +326,7 @@ class SessionManager {
    * @param {User} user The user who made the reaction.
    */
   handleReactionButtons(reaction, user) {
-    Logger.info(`${this.handleReactionButtons.name}, ${user.tag} reacted with ${reaction.emoji.name} `
+    Logger.debug(`${this.handleReactionButtons.name}, ${user.tag} reacted with ${reaction.emoji.name} `
       + `to message ${reaction.message.id}`);
 
     if (reaction.emoji.name === Session.joinButton) {
@@ -402,6 +402,14 @@ class SessionManager {
     }
     message.delete(); // Clear the caller's command.
     const session = this.getSessionFromUserId(host.id);
+
+    if (numberOfTeams > session.users.length) {
+      Logger.error(`${this.randomizeTeams.name}, host=${host.tag}. Session size is ${session.users.length}. `
+      + `Cannot divide into teams of ${numberOfTeams}`);
+      message.reply(`Session size is ${ session.users.length }. Cannot divide into teams of ${ numberOfTeams }`);
+      return;
+    }
+
     session.randomizeTeams(numberOfTeams);
   }
 }

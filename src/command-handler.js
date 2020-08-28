@@ -126,7 +126,7 @@ class CommandHandler {
   /**
    * Print a help message for the user containing all the available commands.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleHelpCommand(message, command, host) {
@@ -142,7 +142,7 @@ class CommandHandler {
    * Parse the start command and send the information to the SessionManager to create
    * a session for the user.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleStartCommand(message, command, host) {
@@ -163,7 +163,7 @@ class CommandHandler {
   /**
    * Inform the SessionManager that the user wishes to end their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleEndCommand(message, command, host) {
@@ -174,7 +174,7 @@ class CommandHandler {
   /**
    * Inform the SessionManager that the user wishes to cancel (i.e. delete) their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleCancelCommand(message, command, host) {
@@ -186,7 +186,7 @@ class CommandHandler {
    * Parse the add command and send the information to the SessionManager to add
    * any number of users to the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleAddCommand(message, command, host) {
@@ -208,7 +208,7 @@ class CommandHandler {
    * Parse the remove command and send the information to the SessionManager to remove
    * any number of users from the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRemoveCommand(message, command, host) {
@@ -230,7 +230,7 @@ class CommandHandler {
    * Parse the resize command and send the information to the SessionManager to resize
    * the user count of the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleResizeCommand(message, command, host) {
@@ -244,7 +244,7 @@ class CommandHandler {
    * Parse the rename command and send the information to the SessionManager to rename
    * the title of the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRenameCommand(message, command, host) {
@@ -259,8 +259,8 @@ class CommandHandler {
   /**
    * Inform the SessionManager that the user wishes to advertise their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
-   * @param {User} host The sender of the command. 
+   * @param {string} command The original command that the user sent.
+   * @param {User} host The sender of the command.
    */
   handleAdvertiseCommand(message, command, host) {
     Logger.info(`Advertise from ${host.tag}: ${command}`);
@@ -270,7 +270,7 @@ class CommandHandler {
   /**
    * Flip a coin (for settling disbutes).
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleCoinFlipCommand(message, command, host) {
@@ -282,7 +282,7 @@ class CommandHandler {
   /**
    * Roll a dice with any number of sides.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRollDiceCommand(message, command, host) {
@@ -305,7 +305,7 @@ class CommandHandler {
   /**
    * Randomly assign your session's users into the specified number of teams
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleTeamsCommand(message, command, host) {
@@ -316,8 +316,8 @@ class CommandHandler {
       numberOfTeams = parseInt(matches[0]);
     }
 
-    if (numberOfTeams <= 1) {
-      message.reply("Number of teams should be 2 or more.");
+    if (numberOfTeams < 0) {
+      message.reply("Number of teams cannot be less than 0.");
       return;
     }
 
