@@ -6,19 +6,20 @@ A Discord bot for creating an open invite to anything (games, events, etc.) for 
 
 ## How to Use
 
-| How To                                                                              | Command                                        |
-| ------------------------------------------------------------------------------------| ---------------------------------------------- |
-| Print available commands                                                            | !help                                          |
-| Start a session                                                                     | !start [NUMBER_OF_USERS] "TITLE"               |
-| End your session (deactivates the session but keeps it in the channel's history)    | !end                                           |
-| Cancel your session (removes the session from the channel's history)                | !cancel                                        |
-| Add users to your session (users could also join by reacting with 👍)               | !add @username @username ...                   |
-| Remove users from your session (users could also leave by reacting with ✋)         | !remove @username @username ...                |
-| Change the number of slots for your session                                         | !resize [NUMBER_OF_PLAYERS]                    |
-| Rename your session's title                                                         | !rename "NEW TITLE"                            |
-| Advertise your session (repost your session so it's at the bottom of the chat)      | !advertise                                     |
-| Flip a coin (for settling disbutes)                                                 | !coinflip                                      |
-| Roll a dice with any number of sides                                                | !rolldice [NUMBER_OF_SIDES]                    |
+| How To                                                                                                   | Command                          |
+|----------------------------------------------------------------------------------------------------------|----------------------------------|
+| Print available commands                                                                                 | !help                            |
+| Start a session                                                                                          | !start [NUMBER_OF_USERS] "TITLE" |
+| End your session (deactivates the session but keeps it in the channel's history)                         | !end                             |
+| Cancel your session (removes the session from the channel's history)                                     | !cancel                          |
+| Add users to your session (users could also join by reacting with 👍)                                    | !add @username @username ...     |
+| Remove users from your session (users could also leave by reacting with ✋)                              | !remove @username @username ...  |
+| Change the number of slots for your session                                                              | !resize [NUMBER_OF_PLAYERS]      |
+| Rename your session's title                                                                              | !rename "NEW TITLE"              |
+| Advertise your session (repost your session so it's at the bottom of the chat)                           | !advertise                       |
+| Flip a coin (for settling disbutes)                                                                      | !coinflip                        |
+| Roll a dice with any number of sides                                                                     | !rolldice [NUMBER_OF_SIDES]      |
+| Randomly assign your session's users into teams (Reset to normal session if [NUMBER_OF_TEAMS] is 0 or 1) | !teams [NUMBER_OF_TEAMS]         |
 
 ## Setup
 

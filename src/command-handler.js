@@ -6,17 +6,18 @@ const Session = require("./session.js");
 /** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
   static COMMANDS = {
-    HELP:         "!help",
-    START:        "!start",
-    END:          "!end",
-    CANCEL:       "!cancel",
-    ADD:          "!add",
-    REMOVE:       "!remove",
-    RESIZE:       "!resize",
-    RENAME:       "!rename",
-    ADVERTISE:    "!advertise",
-    COINFLIP:     "!coinflip",
-    ROLLDICE:     "!rolldice",
+    HELP: "!help",
+    START: "!start",
+    END: "!end",
+    CANCEL: "!cancel",
+    ADD: "!add",
+    REMOVE: "!remove",
+    RESIZE: "!resize",
+    RENAME: "!rename",
+    ADVERTISE: "!advertise",
+    COINFLIP: "!coinflip",
+    ROLLDICE: "!rolldice",
+    TEAMS: "!teams",
   };
 
   static HELP_MESSAGE = [
@@ -64,6 +65,10 @@ class CommandHandler {
       name: `Roll a dice with any number of sides`,
       value: `${CommandHandler.COMMANDS.ROLLDICE} [NUMBER_OF_SIDES]`,
     },
+    {
+      name: `Randomly assign your session's users into teams (Reset to normal session if [NUMBER_OF_TEAMS] is 0 or 1)`,
+      value: `${CommandHandler.COMMANDS.TEAMS} [NUMBER_OF_TEAMS]`,
+    },
   ];
 
   constructor(sessionManager) {
@@ -76,40 +81,44 @@ class CommandHandler {
    */
   handle(message) {
     const command = message.content;
+    const check = message.content.toLowerCase();
     const host = message.author;
 
-    if (command.startsWith(CommandHandler.COMMANDS.HELP))
+    if (check.startsWith(CommandHandler.COMMANDS.HELP))
       this.handleHelpCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.START))
+    if (check.startsWith(CommandHandler.COMMANDS.START))
       this.handleStartCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.END))
+    if (check.startsWith(CommandHandler.COMMANDS.END))
       this.handleEndCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.CANCEL))
+    if (check.startsWith(CommandHandler.COMMANDS.CANCEL))
       this.handleCancelCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ADD))
+    if (check.startsWith(CommandHandler.COMMANDS.ADD))
       this.handleAddCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.REMOVE))
+    if (check.startsWith(CommandHandler.COMMANDS.REMOVE))
       this.handleRemoveCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.RESIZE))
+    if (check.startsWith(CommandHandler.COMMANDS.RESIZE))
       this.handleResizeCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.RENAME))
+    if (check.startsWith(CommandHandler.COMMANDS.RENAME))
       this.handleRenameCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ADVERTISE))
+    if (check.startsWith(CommandHandler.COMMANDS.ADVERTISE))
       this.handleAdvertiseCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.COINFLIP))
+    if (check.startsWith(CommandHandler.COMMANDS.COINFLIP))
       this.handleCoinFlipCommand(message, command, host);
 
-    if (command.startsWith(CommandHandler.COMMANDS.ROLLDICE))
+    if (check.startsWith(CommandHandler.COMMANDS.ROLLDICE))
       this.handleRollDiceCommand(message, command, host);
+
+    if (check.startsWith(CommandHandler.COMMANDS.TEAMS))
+      this.handleTeamsCommand(message, command, host);
 
     // Do nothing if command not recognized.
   }
@@ -117,7 +126,7 @@ class CommandHandler {
   /**
    * Print a help message for the user containing all the available commands.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleHelpCommand(message, command, host) {
@@ -133,7 +142,7 @@ class CommandHandler {
    * Parse the start command and send the information to the SessionManager to create
    * a session for the user.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleStartCommand(message, command, host) {
@@ -148,13 +157,13 @@ class CommandHandler {
     if (matchesTitle !== null && matchesTitle[1] !== "")
       title = matchesTitle[1];
 
-      this.sessionManager.startSession(message, host, title, userCount);
+    this.sessionManager.startSession(message, host, title, userCount);
   }
 
   /**
    * Inform the SessionManager that the user wishes to end their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleEndCommand(message, command, host) {
@@ -165,7 +174,7 @@ class CommandHandler {
   /**
    * Inform the SessionManager that the user wishes to cancel (i.e. delete) their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleCancelCommand(message, command, host) {
@@ -177,7 +186,7 @@ class CommandHandler {
    * Parse the add command and send the information to the SessionManager to add
    * any number of users to the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleAddCommand(message, command, host) {
@@ -199,7 +208,7 @@ class CommandHandler {
    * Parse the remove command and send the information to the SessionManager to remove
    * any number of users from the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRemoveCommand(message, command, host) {
@@ -221,7 +230,7 @@ class CommandHandler {
    * Parse the resize command and send the information to the SessionManager to resize
    * the user count of the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleResizeCommand(message, command, host) {
@@ -235,7 +244,7 @@ class CommandHandler {
    * Parse the rename command and send the information to the SessionManager to rename
    * the title of the caller's session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRenameCommand(message, command, host) {
@@ -250,8 +259,8 @@ class CommandHandler {
   /**
    * Inform the SessionManager that the user wishes to advertise their session.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
-   * @param {User} host The sender of the command. 
+   * @param {string} command The original command that the user sent.
+   * @param {User} host The sender of the command.
    */
   handleAdvertiseCommand(message, command, host) {
     Logger.info(`Advertise from ${host.tag}: ${command}`);
@@ -261,11 +270,11 @@ class CommandHandler {
   /**
    * Flip a coin (for settling disbutes).
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleCoinFlipCommand(message, command, host) {
-    const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails" ;
+    const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails";
     Logger.info(`Coinflip ${result} from ${host.tag}: ${command}`);
     message.reply(result);
   }
@@ -273,11 +282,15 @@ class CommandHandler {
   /**
    * Roll a dice with any number of sides.
    * @param {Message} message The message that the user sent.
-   * @param {string} command The original command that the user sent. 
+   * @param {string} command The original command that the user sent.
    * @param {User} host The sender of the command.
    */
   handleRollDiceCommand(message, command, host) {
-    const sides = command.match(/\d+/g)[0];
+    let sides = 6;
+    const matches = command.match(/\d+/g);
+    if (matches !== null) {
+      sides = parseInt(matches[0]);
+    }
 
     if (sides <= 0) {
       message.reply("The number of sides must be 1 or more.");
@@ -287,6 +300,28 @@ class CommandHandler {
     const result = Math.floor(Math.random() * sides) + 1;
     Logger.info(`Rolldice ${result} from ${host.tag}: ${command}`);
     message.reply(result);
+  }
+
+  /**
+   * Randomly assign your session's users into the specified number of teams
+   * @param {Message} message The message that the user sent.
+   * @param {string} command The original command that the user sent.
+   * @param {User} host The sender of the command.
+   */
+  handleTeamsCommand(message, command, host) {
+    Logger.info(`Teams from ${host.tag}: ${command}`);
+    let numberOfTeams = 2;
+    const matches = command.match(/\d+/g);
+    if (matches !== null) {
+      numberOfTeams = parseInt(matches[0]);
+    }
+
+    if (numberOfTeams < 0) {
+      message.reply("Number of teams cannot be less than 0.");
+      return;
+    }
+
+    this.sessionManager.randomizeTeams(message, host, numberOfTeams);
   }
 }
 

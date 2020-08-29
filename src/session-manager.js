@@ -9,14 +9,16 @@ class SessionManager {
    * @param {DiscordBot} discordBot Dependency for performing Discord specific operations.
    * @param {*} config Object containing various configurations for the SessionManager.
    */
-  constructor(discordBot, config = {
+  constructor(discordBot, guild, config = {
     MAX_SESSION_SIZE: 50,
-    MAX_SESSION_DURATION_MS: 12 * 60 * 60 * 1000, // 12 Hours
+    MIN_SESSION_LIFETIME_MS: 3 * 60 * 60 * 1000, // 3 Hours
+    MAX_SESSION_LIFETIME_MS: 12 * 60 * 60 * 1000, // 12 Hours
     CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hours
-    DEFAULT_SESSION_SIZE: 5,
+    DEFAULT_SESSION_SIZE: 4,
     DEFAULT_TITLE: "Gaming Sesh",
   }) {
     this.discordBot = discordBot;
+    this.guild = guild;
     this.config = config;
     this.sessions = {};
     setInterval(() => this.cleanupOldSessions(), this.config.CLEANUP_INTERVAL_MS);
@@ -25,7 +27,7 @@ class SessionManager {
   /**
    * Obtain the session owned by the provided user.
    * @param {number} hostId The ID of the user.
-   * @returns {Session} The session owned by the provided user. Returns undefined if the user does not have an active session.
+   * @returns {Session} The session owned by the user. Returns undefined if the user does not have an active session.
    */
   getSessionFromUserId(hostId) {
     Logger.info(`${this.getSessionFromUserId.name}, userId=${hostId}`);
@@ -87,7 +89,7 @@ class SessionManager {
    * Start a session for the provided user.
    * @param {Message} message The original message to respond to if any issues occur.
    * @param {User} host The owner of the session to start.
-   * @param {string} title The title of the session. 
+   * @param {string} title The title of the session.
    * @param {number} sessionSize The amount of open slots for the session.
    */
   startSession(message, host, title = this.config.DEFAULT_TITLE, sessionSize = this.config.DEFAULT_SESSION_SIZE) {
@@ -102,7 +104,8 @@ class SessionManager {
       return;
     }
     if (sessionSize > this.config.MAX_SESSION_SIZE) {
-      Logger.error(`${this.startSession.name}, host=${host.tag}, sessionSize=${sessionSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
+      Logger.error(`${this.startSession.name}, host=${host.tag}, `
+        + `sessionSize=${sessionSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
       message.reply(`The number of users a session could have is between 1 and ${this.config.MAX_SESSION_SIZE}.`);
       return;
     }
@@ -126,6 +129,17 @@ class SessionManager {
     const session = this.getSessionFromUserId(host.id);
     session.end();
     this.deleteSessionFromUserId(host.id);
+  }
+
+  /**
+   * Forcefully end all sessions registered under this SessionManager.
+   */
+  endAllSessions() {
+    for (const [hostId, session] of Object.entries(this.sessions)) {
+      Logger.info(`${this.endAllSessions.name}. Ending session from host=${hostId}`);
+      session.end();
+      this.deleteSessionFromUserId(hostId);
+    }
   }
 
   /**
@@ -213,14 +227,16 @@ class SessionManager {
       return;
     }
     if (newSize > this.config.MAX_SESSION_SIZE) {
-      Logger.error(`${this.resizeSession.name}, host=${host.tag}, newSize=${newSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
+      Logger.error(`${this.resizeSession.name}, host=${host.tag}, `
+        + `newSize=${newSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
       message.reply(`The number of users a session could have is between 1 and ${this.config.MAX_SESSION_SIZE}.`);
       return;
     }
     message.delete(); // Clear the caller's command.
     const session = this.getSessionFromUserId(host.id);
     if (!session.resize(newSize)) {
-      Logger.error(`${this.resizeSession.name}, host=${host.tag}, newSize=${newSize}. Connected users = ${session.connected}`);
+      Logger.error(`${this.resizeSession.name}, host=${host.tag}, `
+        + `newSize=${newSize}. Connected users = ${session.connected}`);
       message.reply(`Cannot resize the session to ${newSize} because there's ${session.connected} connected user(s).`);
       return;
     }
@@ -260,28 +276,65 @@ class SessionManager {
   }
 
   /**
-   * End any dormant sessions that have existed longer than the configurable MAX_SESSION_DURATION_MS.
+   * End any dormant sessions that have existed longer than the configurable MAX_SESSION_LIFETIME_MS.
    */
   cleanupOldSessions() {
     Logger.info(`${this.cleanupOldSessions.name}, Starting cleanup routine`);
     const now = new Date();
     for (const [hostId, session] of Object.entries(this.sessions)) {
-      const compare = new Date(session.startTime.getTime() + this.config.MAX_SESSION_DURATION_MS);
-      if (now >= compare) {
+      const maxSessionLifetimeEndTime = new Date(session.startTime.getTime() + this.config.MAX_SESSION_LIFETIME_MS);
+      if (now >= maxSessionLifetimeEndTime) {
         Logger.info(`Session marked for cleanup from user: ${hostId}`);
         session.end();
         this.deleteSessionFromUserId(hostId);
       }
-    }    
+    }
     Logger.info(`${this.cleanupOldSessions.name}, Ending cleanup routine`);
+  }
+
+  /**
+   * Manually end any session in which none of its users are connected to a voice channel.
+   * A session must be active for atleast MIN_SESSION_LIFETIME_MS before it is to be considered.
+   */
+  tryCleanupOldSessions() {
+    Logger.info(`${this.tryCleanupOldSessions.name}, Starting try cleanup routine`);
+    const now = new Date();
+    for (const [hostId, session] of Object.entries(this.sessions)) {
+      const minSessionLifetimeEndTime = new Date(session.startTime.getTime() + this.config.MIN_SESSION_LIFETIME_MS);
+      if (now < minSessionLifetimeEndTime) continue; // Session is not active for long enough.
+
+      const usersConnectedToVoice = this.discordBot.getUsersConnectedToVoiceInGuild(this.guild);
+      const sessionUsers = session.users;
+
+      const sessionUsersStillConnectedToVoice
+        = usersConnectedToVoice.filter(user => sessionUsers.includes(`<@${user.id}>` || user.id == this.host.id));
+
+      Logger.debug(`${this.tryCleanupOldSessions.name},\n`
+        + `usersConnectedToVoice(${usersConnectedToVoice.length})=\n`
+        + `${usersConnectedToVoice.join("\n")}`
+        + `sessionUsers(${sessionUsers.length})=\n`
+        + `${sessionUsers.join("\n")}`
+        + `sessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=\n`
+        + `${sessionUsersStillConnectedToVoice.join("\n")}`);
+
+      if (sessionUsersStillConnectedToVoice.length === 0) {
+        Logger.info(`Session marked for cleanup from user: ${hostId}`);
+        session.end();
+        this.deleteSessionFromUserId(hostId);
+      }
+    }
+    Logger.info(`${this.tryCleanupOldSessions.name}, Ending try cleanup routine`);
   }
 
   /**
    * Determine if a user's reaction is a reaction button used for this bot.
    * @param {MessageReaction} reaction The reaction message to check.
-   * @param {User} user The user who made the reaction. 
+   * @param {User} user The user who made the reaction.
    */
   handleReactionButtons(reaction, user) {
+    Logger.debug(`${this.handleReactionButtons.name}, ${user.tag} reacted with ${reaction.emoji.name} `
+      + `to message ${reaction.message.id}`);
+
     if (reaction.emoji.name === Session.joinButton) {
       this.addUserToSessionFromReaction(reaction, user);
     }
@@ -295,7 +348,7 @@ class SessionManager {
 
   /**
    * Add the user to the appropriate session if they reacted with the join button.
-   * @param {MessageReaction} reaction The reaction message to check. 
+   * @param {MessageReaction} reaction The reaction message to check.
    * @param {User} user The user who made the reaction.
    */
   addUserToSessionFromReaction(reaction, user) {
@@ -304,7 +357,13 @@ class SessionManager {
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
       // Don't do anything if the user is already connected.
-      if (session.embedMessage.id === reaction.message.id && !session.isUserConnected(user)) {
+      if (session.getEmbedMessageId() === reaction.message.id && !session.isUserConnected(user)) {
+
+        if (!session.isReady) {
+          Logger.info(`${this.addUserToSessionFromReaction.name}. Session not ready`);
+          break;
+        }
+
         session.addUsers([user]); // Ignoring return value.
         break;
       }
@@ -325,7 +384,13 @@ class SessionManager {
     for (const hostId in this.sessions) {
       const session = this.getSessionFromUserId(hostId);
       // Don't do anything if the user is not connected.
-      if (session.embedMessage.id === reaction.message.id && session.isUserConnected(user)) {
+      if (session.getEmbedMessageId() === reaction.message.id && session.isUserConnected(user)) {
+
+        if (!session.isReady) {
+          Logger.info(`${this.removeUserFromSessionFromReaction.name}. Session not ready`);
+          break;
+        }
+
         session.removeUsers([user]); // Ignoring return value
         break;
       }
@@ -333,6 +398,25 @@ class SessionManager {
 
     // If we couldn't match the reaction's message id with a session's embed message id,
     // then the reaction was for some unrelated message. Thus we ignore it.
+  }
+
+  randomizeTeams(message, host, numberOfTeams = 2) {
+    if (!this.hasSession(host)) {
+      Logger.error(`${this.randomizeTeams.name}, host=${host.tag}. User does not have an active session.`);
+      message.reply("You have no active sessions?");
+      return;
+    }
+    message.delete(); // Clear the caller's command.
+    const session = this.getSessionFromUserId(host.id);
+
+    if (numberOfTeams > session.users.length) {
+      Logger.error(`${this.randomizeTeams.name}, host=${host.tag}. Session size is ${session.users.length}. `
+        + `Cannot divide into teams of ${numberOfTeams}`);
+      message.reply(`Session size is ${session.users.length}. Cannot divide into teams of ${numberOfTeams}`);
+      return;
+    }
+
+    session.randomizeTeams(numberOfTeams);
   }
 }
 
