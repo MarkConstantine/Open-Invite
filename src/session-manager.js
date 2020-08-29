@@ -27,7 +27,7 @@ class SessionManager {
   /**
    * Obtain the session owned by the provided user.
    * @param {number} hostId The ID of the user.
-   * @returns {Session} The session owned by the provided user. Returns undefined if the user does not have an active session.
+   * @returns {Session} The session owned by the user. Returns undefined if the user does not have an active session.
    */
   getSessionFromUserId(hostId) {
     Logger.info(`${this.getSessionFromUserId.name}, userId=${hostId}`);
@@ -104,7 +104,8 @@ class SessionManager {
       return;
     }
     if (sessionSize > this.config.MAX_SESSION_SIZE) {
-      Logger.error(`${this.startSession.name}, host=${host.tag}, sessionSize=${sessionSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
+      Logger.error(`${this.startSession.name}, host=${host.tag}, `
+        + `sessionSize=${sessionSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
       message.reply(`The number of users a session could have is between 1 and ${this.config.MAX_SESSION_SIZE}.`);
       return;
     }
@@ -226,14 +227,16 @@ class SessionManager {
       return;
     }
     if (newSize > this.config.MAX_SESSION_SIZE) {
-      Logger.error(`${this.resizeSession.name}, host=${host.tag}, newSize=${newSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
+      Logger.error(`${this.resizeSession.name}, host=${host.tag}, `
+        + `newSize=${newSize}, MAX_SESSION_SIZE=${this.config.MAX_SESSION_SIZE}`);
       message.reply(`The number of users a session could have is between 1 and ${this.config.MAX_SESSION_SIZE}.`);
       return;
     }
     message.delete(); // Clear the caller's command.
     const session = this.getSessionFromUserId(host.id);
     if (!session.resize(newSize)) {
-      Logger.error(`${this.resizeSession.name}, host=${host.tag}, newSize=${newSize}. Connected users = ${session.connected}`);
+      Logger.error(`${this.resizeSession.name}, host=${host.tag}, `
+        + `newSize=${newSize}. Connected users = ${session.connected}`);
       message.reply(`Cannot resize the session to ${newSize} because there's ${session.connected} connected user(s).`);
       return;
     }
@@ -307,9 +310,12 @@ class SessionManager {
         = usersConnectedToVoice.filter(user => sessionUsers.includes(`<@${user.id}>` || user.id == this.host.id));
 
       Logger.debug(`${this.tryCleanupOldSessions.name},\n`
-        + `\tusersConnectedToVoice(${usersConnectedToVoice.length})=${usersConnectedToVoice}\n`
-        + `\tsessionUsers(${sessionUsers.length})=${sessionUsers}\n`
-        + `\tsessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=${sessionUsersStillConnectedToVoice}`);
+        + `\tusersConnectedToVoice(${usersConnectedToVoice.length})=`
+        + `${usersConnectedToVoice.join("\n")}`
+        + `\tsessionUsers(${sessionUsers.length})=`
+        + `${sessionUsers.join("\n")}`
+        + `\tsessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=`
+        + `${sessionUsersStillConnectedToVoice.join("\n")}`);
 
       if (sessionUsersStillConnectedToVoice.length === 0) {
         Logger.info(`Session marked for cleanup from user: ${hostId}`);
@@ -405,8 +411,8 @@ class SessionManager {
 
     if (numberOfTeams > session.users.length) {
       Logger.error(`${this.randomizeTeams.name}, host=${host.tag}. Session size is ${session.users.length}. `
-      + `Cannot divide into teams of ${numberOfTeams}`);
-      message.reply(`Session size is ${ session.users.length }. Cannot divide into teams of ${ numberOfTeams }`);
+        + `Cannot divide into teams of ${numberOfTeams}`);
+      message.reply(`Session size is ${session.users.length}. Cannot divide into teams of ${numberOfTeams}`);
       return;
     }
 
