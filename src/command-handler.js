@@ -6,18 +6,18 @@ const Session = require("./session.js");
 /** Class to handle/parse any valid commands for this bot. */
 class CommandHandler {
   static COMMANDS = {
-    HELP:         "!help",
-    START:        "!start",
-    END:          "!end",
-    CANCEL:       "!cancel",
-    ADD:          "!add",
-    REMOVE:       "!remove",
-    RESIZE:       "!resize",
-    RENAME:       "!rename",
-    ADVERTISE:    "!advertise",
-    COINFLIP:     "!coinflip",
-    ROLLDICE:     "!rolldice",
-    TEAMS:        "!teams",
+    HELP: "!help",
+    START: "!start",
+    END: "!end",
+    CANCEL: "!cancel",
+    ADD: "!add",
+    REMOVE: "!remove",
+    RESIZE: "!resize",
+    RENAME: "!rename",
+    ADVERTISE: "!advertise",
+    COINFLIP: "!coinflip",
+    ROLLDICE: "!rolldice",
+    TEAMS: "!teams",
   };
 
   static HELP_MESSAGE = [
@@ -66,7 +66,7 @@ class CommandHandler {
       value: `${CommandHandler.COMMANDS.ROLLDICE} [NUMBER_OF_SIDES]`,
     },
     {
-      name: `Randomly assign your session's users into the specified number of teams`,
+      name: `Randomly assign your session's users into teams (Reset to normal session if [NUMBER_OF_TEAMS] is 0 or 1)`,
       value: `${CommandHandler.COMMANDS.TEAMS} [NUMBER_OF_TEAMS]`,
     },
   ];
@@ -157,7 +157,7 @@ class CommandHandler {
     if (matchesTitle !== null && matchesTitle[1] !== "")
       title = matchesTitle[1];
 
-      this.sessionManager.startSession(message, host, title, userCount);
+    this.sessionManager.startSession(message, host, title, userCount);
   }
 
   /**
@@ -274,7 +274,7 @@ class CommandHandler {
    * @param {User} host The sender of the command.
    */
   handleCoinFlipCommand(message, command, host) {
-    const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails" ;
+    const result = (Math.floor(Math.random() * 2) == 0) ? "Heads" : "Tails";
     Logger.info(`Coinflip ${result} from ${host.tag}: ${command}`);
     message.reply(result);
   }
