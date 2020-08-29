@@ -310,11 +310,11 @@ class SessionManager {
         = usersConnectedToVoice.filter(user => sessionUsers.includes(`<@${user.id}>` || user.id == this.host.id));
 
       Logger.debug(`${this.tryCleanupOldSessions.name},\n`
-        + `\tusersConnectedToVoice(${usersConnectedToVoice.length})=`
+        + `usersConnectedToVoice(${usersConnectedToVoice.length})=\n`
         + `${usersConnectedToVoice.join("\n")}`
-        + `\tsessionUsers(${sessionUsers.length})=`
+        + `sessionUsers(${sessionUsers.length})=\n`
         + `${sessionUsers.join("\n")}`
-        + `\tsessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=`
+        + `sessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=\n`
         + `${sessionUsersStillConnectedToVoice.join("\n")}`);
 
       if (sessionUsersStillConnectedToVoice.length === 0) {
