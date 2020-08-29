@@ -202,11 +202,10 @@ class Session {
    */
   constructFieldString(sessionState = Session.STATES.ACTIVE, teamSize = this.users.length, userStartIndex = 0) {
     let fieldString = "";
+    const isClosed = (sessionState === Session.STATES.ENDED || sessionState === Session.STATES.TEAMS_ENDED);
     for (let i = userStartIndex; i < userStartIndex + teamSize; i++) {
       const user = this.users[i];
-      const closedOrOpen = (sessionState === Session.STATES.ENDED || sessionState === Session.STATES.TEAMS_ENDED)
-        ? "CLOSED SLOT"
-        : "OPEN SLOT";
+      const closedOrOpen = isClosed ? "CLOSED SLOT" : "OPEN SLOT";
       const newLine = (i === this.users.length - 1) ? "" : "\n"; // Don't newline the last element.
       fieldString += `${i + 1}. ${user === undefined ? closedOrOpen : user}${newLine}`;
     }
@@ -232,11 +231,19 @@ class Session {
         return fields;
       case Session.STATES.TEAMS_ACTIVE:
       case Session.STATES.TEAMS_ENDED:
+        let remainingSlots = this.users.length % this.numberOfTeams; // Slots that cannot fit evenly into teams.
+        let userStartIndex = 0;
         for (let i = 0; i < this.numberOfTeams; i++) {
+          // Distribute remaining slots across teams if number of teams does not divide evenly into the session's size.
+          const distribute = (remainingSlots-- > 0) ? 1 : 0;
+          const thisTeamSize = this.teamSize + distribute;
+
           fields.push({
             name: `Team ${i + 1}`,
-            value: this.constructFieldString(sessionState, this.teamSize, i * this.teamSize)
+            value: this.constructFieldString(sessionState, thisTeamSize, userStartIndex)
           });
+
+          userStartIndex += thisTeamSize;
         }
         return fields;
       default:
