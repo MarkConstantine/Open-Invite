@@ -307,15 +307,15 @@ class SessionManager {
       const sessionUsers = session.users;
 
       const sessionUsersStillConnectedToVoice
-        = usersConnectedToVoice.filter(user => sessionUsers.includes(`<@${user.id}>` || user.id == this.host.id));
+        = usersConnectedToVoice.filter(user => (user.id === this.host.id) || sessionUsers.some(u => u.id === user.id));
 
       Logger.debug(`${this.tryCleanupOldSessions.name},\n`
         + `usersConnectedToVoice(${usersConnectedToVoice.length})=\n`
-        + `${usersConnectedToVoice.join("\n")}`
+        + `${usersConnectedToVoice.join("\n")}\n`
         + `sessionUsers(${sessionUsers.length})=\n`
-        + `${sessionUsers.join("\n")}`
+        + `${sessionUsers.join("\n")}\n`
         + `sessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=\n`
-        + `${sessionUsersStillConnectedToVoice.join("\n")}`);
+        + `${sessionUsersStillConnectedToVoice.join("\n")}\n`);
 
       if (sessionUsersStillConnectedToVoice.length === 0) {
         Logger.info(`Session marked for cleanup from user: ${hostId}`);
