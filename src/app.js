@@ -12,7 +12,7 @@ class OpenInvite {
     this.discordBot = new DiscordBot();
     this.myGuilds = {};
 
-    ["SIGINT", "uncaughtException"].forEach((eventType) => {
+    ["SIGINT"].forEach((eventType) => {
       process.on(eventType, this.stop.bind(this, eventType));
     })
 
@@ -35,6 +35,10 @@ class OpenInvite {
     });
 
     this.discordBot.on("voiceStateUpdate", (oldMember, newMember) => {
+      if (oldMember.channel === null && newMember.channel !== null) {
+        Logger.debug(`Client ${newMember.id} connected to a voice channel.`);
+        this.getGuildSessionManager(newMember.guild).markUserSessionEligibleForCleanup(newMember.id);
+      }
       if (newMember.channel === null) {
         Logger.debug(`Client ${newMember.id} disconnected from a voice channel.`);
         this.getGuildSessionManager(newMember.guild).tryCleanupOldSessions();

@@ -41,7 +41,8 @@ class Session {
     this.state = Session.STATES.ACTIVE;
     this.numberOfTeams = 2;
     this.teamSize = Math.floor(userCount / this.numberOfTeams);
-    this.isReady = false;
+    this.isReadyForInput = false;
+    this.isEligibleForEarlyCleanup = false;
     this.sendEmbedMessage();
   }
 
@@ -288,7 +289,7 @@ class Session {
    * Send the session's info as an Embed Message.
    */
   sendEmbedMessage() {
-    this.isReady = false;
+    this.isReadyForInput = false;
 
     // Create a new embed message on discord.
     this.message.channel.send(this.createEmbed(this.state))
@@ -312,7 +313,7 @@ class Session {
         // Create the leave button.
         this.embedMessage
           .react(Session.leaveButton)
-          .then(_ => this.isReady = true) // Ready only after the bot sends the leave button reaction.
+          .then(_ => this.isReadyForInput = true) // Ready only after the bot sends the leave button reaction.
           .catch(error =>
             Logger.error(`${this.sendEmbedMessage.name}, host=${this.host.tag}, embedMessage=${this.embedMessage.id}. `
               + `Failed to react ${Session.leaveButton}, ${error}`));
