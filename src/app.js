@@ -14,7 +14,7 @@ class OpenInvite {
 
     ["SIGINT"].forEach((eventType) => {
       process.on(eventType, this.stop.bind(this, eventType));
-    })
+    });
 
     this.discordBot.on("guildCreate", guild => {
       Logger.info(`guildCreate, ${this.botName} was added to guild: ${guild.name}`);
@@ -76,10 +76,10 @@ class OpenInvite {
 
     this.discordBot
       .login(token)
-      .then(_ => {
+      .then(() => {
         this.discordBot.getConnectedServers().forEach(guild => {
           this.addNewGuild(guild);
-        })
+        });
       })
       .catch(error => {
         Logger.error(`Failed to login. ${error}`);
@@ -96,13 +96,13 @@ class OpenInvite {
     }
 
     const sleep = (milliseconds) => {
-      return new Promise(resolve => setTimeout(resolve, milliseconds))
+      return new Promise(resolve => setTimeout(resolve, milliseconds));
     };
 
     // Sleeping before exiting to make sure all exit-related API requests go through.
     // Not the best solution but it works. ¯\_(ツ)_/¯
     Logger.info("Sleeping...");
-    sleep(5000).then(_ => {
+    sleep(5000).then(() => {
       Logger.info("Exiting...");
       process.exit();
     });
