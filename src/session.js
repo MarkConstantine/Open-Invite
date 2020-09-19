@@ -41,7 +41,8 @@ class Session {
     this.state = Session.STATES.ACTIVE;
     this.numberOfTeams = 2;
     this.teamSize = Math.floor(userCount / this.numberOfTeams);
-    this.isReady = false;
+    this.isReadyForInput = false;
+    this.isEligibleForEarlyCleanup = false;
     this.sendEmbedMessage();
   }
 
@@ -223,14 +224,15 @@ class Session {
 
     switch (sessionState) {
       case Session.STATES.ACTIVE:
-      case Session.STATES.ENDED:
+      case Session.STATES.ENDED: {
         fields.push({
           name: "Connected",
           value: this.constructFieldString(sessionState)
         });
         return fields;
+      }
       case Session.STATES.TEAMS_ACTIVE:
-      case Session.STATES.TEAMS_ENDED:
+      case Session.STATES.TEAMS_ENDED: {
         let remainingSlots = this.users.length % this.numberOfTeams; // Slots that cannot fit evenly into teams.
         let userStartIndex = 0;
         for (let i = 0; i < this.numberOfTeams; i++) {
@@ -246,6 +248,7 @@ class Session {
           userStartIndex += thisTeamSize;
         }
         return fields;
+      }
       default:
         Logger.error(`${this.createEmbed.name}, host=${this.host.tag}, Unknown sessionState=${sessionState}`);
     }
@@ -288,7 +291,7 @@ class Session {
    * Send the session's info as an Embed Message.
    */
   sendEmbedMessage() {
-    this.isReady = false;
+    this.isReadyForInput = false;
 
     // Create a new embed message on discord.
     this.message.channel.send(this.createEmbed(this.state))
@@ -312,7 +315,7 @@ class Session {
         // Create the leave button.
         this.embedMessage
           .react(Session.leaveButton)
-          .then(_ => this.isReady = true) // Ready only after the bot sends the leave button reaction.
+          .then(() => this.isReadyForInput = true) // Ready only after the bot sends the leave button reaction.
           .catch(error =>
             Logger.error(`${this.sendEmbedMessage.name}, host=${this.host.tag}, embedMessage=${this.embedMessage.id}. `
               + `Failed to react ${Session.leaveButton}, ${error}`));

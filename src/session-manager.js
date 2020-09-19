@@ -12,7 +12,7 @@ class SessionManager {
   constructor(discordBot, guild, config = {
     MAX_SESSION_SIZE: 50,
     MIN_SESSION_LIFETIME_MS: 3 * 60 * 60 * 1000, // 3 Hours
-    MAX_SESSION_LIFETIME_MS: 12 * 60 * 60 * 1000, // 12 Hours
+    MAX_SESSION_LIFETIME_MS: 24 * 60 * 60 * 1000, // 24 Hours
     CLEANUP_INTERVAL_MS: 6 * 60 * 60 * 1000, // 6 Hours
     DEFAULT_SESSION_SIZE: 4,
     DEFAULT_TITLE: "Gaming Sesh",
@@ -293,6 +293,19 @@ class SessionManager {
   }
 
   /**
+   * Mark a user's session as eligible to be cleaned up early.
+   * Does nothing if the user does not have a session.
+   * @param {number} userId The ID of the user.
+   */
+  markUserSessionEligibleForCleanup(userId) {
+    const session = this.getSessionFromUserId(userId);
+    if (session !== undefined && !session.isEligibleForEarlyCleanup) {
+      session.isEligibleForEarlyCleanup = true;
+      Logger.info(`User ${userId} session marked eligible for early cleanup`);
+    }
+  }
+
+  /**
    * Manually end any session in which none of its users are connected to a voice channel.
    * A session must be active for atleast MIN_SESSION_LIFETIME_MS before it is to be considered.
    */
@@ -300,20 +313,22 @@ class SessionManager {
     Logger.info(`${this.tryCleanupOldSessions.name}, Starting try cleanup routine`);
     const now = new Date();
     for (const [hostId, session] of Object.entries(this.sessions)) {
+      if (!session.isEligibleForEarlyCleanup) continue;
+
       const minSessionLifetimeEndTime = new Date(session.startTime.getTime() + this.config.MIN_SESSION_LIFETIME_MS);
       if (now < minSessionLifetimeEndTime) continue; // Session is not active for long enough.
 
       const usersConnectedToVoice = this.discordBot.getUsersConnectedToVoiceInGuild(this.guild);
-      const sessionUsers = session.users;
+      const sessionUsers = session.users.filter(uid => uid !== undefined);
 
-      const sessionUsersStillConnectedToVoice
-        = usersConnectedToVoice.filter(user => sessionUsers.includes(`<@${user.id}>` || user.id == this.host.id));
+      const sessionUsersStillConnectedToVoice = usersConnectedToVoice.filter(user =>
+        (user.id === session.host.id) || sessionUsers.some(u => u.id === user.id));
 
       Logger.debug(`${this.tryCleanupOldSessions.name},\n`
         + `usersConnectedToVoice(${usersConnectedToVoice.length})=\n`
-        + `${usersConnectedToVoice.join("\n")}`
+        + `${usersConnectedToVoice.join("\n")}\n`
         + `sessionUsers(${sessionUsers.length})=\n`
-        + `${sessionUsers.join("\n")}`
+        + `${sessionUsers.join("\n")}\n`
         + `sessionUsersStillConnectedToVoice(${sessionUsersStillConnectedToVoice.length})=\n`
         + `${sessionUsersStillConnectedToVoice.join("\n")}`);
 
@@ -359,7 +374,7 @@ class SessionManager {
       // Don't do anything if the user is already connected.
       if (session.getEmbedMessageId() === reaction.message.id && !session.isUserConnected(user)) {
 
-        if (!session.isReady) {
+        if (!session.isReadyForInput) {
           Logger.info(`${this.addUserToSessionFromReaction.name}. Session not ready`);
           break;
         }
@@ -386,7 +401,7 @@ class SessionManager {
       // Don't do anything if the user is not connected.
       if (session.getEmbedMessageId() === reaction.message.id && session.isUserConnected(user)) {
 
-        if (!session.isReady) {
+        if (!session.isReadyForInput) {
           Logger.info(`${this.removeUserFromSessionFromReaction.name}. Session not ready`);
           break;
         }
