@@ -12,14 +12,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12'
-
-      - name: Setup Node
       - run: npm install
-
-      - name: Set token
+      - shell: pwsh
         env:
           TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        run: Set-Content -Path .\.env -Value $TOKEN
-
-      - name: Run
-        run: node src/app.js
+        run: |
+          Set-Content -Path .\.env -Value $TOKEN
+      - run: node src/app.js
