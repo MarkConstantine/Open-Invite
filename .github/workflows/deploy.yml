@@ -18,5 +18,5 @@ jobs:
     needs: build
     runs-on: [self-hosted]
     steps:
-      - run: TASKKILL /IM node.exe
-      - run: start src/app.js
+      - run: TASKLIST | FIND /I "node.exe" && TASKKILL /IM w3wp.exe /F || ECHO process "node.exe" not running.
+      - run: START src/app.js
