@@ -226,7 +226,7 @@ class Session {
       case Session.STATES.ACTIVE:
       case Session.STATES.ENDED: {
         fields.push({
-          name: "Connected",
+          name: "Attending",
           value: this.constructFieldString(sessionState)
         });
         return fields;
