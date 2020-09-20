@@ -14,4 +14,4 @@ jobs:
           node-version: '12'
       - run: npm install
       - run: Set-Content -Path .\.env -Value ${{ secrets.DISCORD_TOKEN }}
-      - run: node src/app.js
+      - run: npm run build --if-present
