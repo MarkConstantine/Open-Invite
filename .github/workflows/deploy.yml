@@ -13,9 +13,5 @@ jobs:
         with:
           node-version: '12'
       - run: npm install
-      - shell: pwsh
-        env:
-          TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        run: |
-          Set-Content -Path .\.env -Value $TOKEN
+      - run: Set-Content -Path .\.env -Value ${{ secrets.DISCORD_TOKEN }}
       - run: node src/app.js
