@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: List directory
+        run: ls -l
       - name: Add Discord Token
         run: echo 'TOKEN=${{ secrets.DISCORD_TOKEN }}' > .env
       - name: Docker Login
