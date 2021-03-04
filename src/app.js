@@ -83,6 +83,7 @@ class OpenInvite {
       })
       .catch(error => {
         Logger.error(`Failed to login. ${error}`);
+        Logger.error(token);
         process.exit();
       });
   }
