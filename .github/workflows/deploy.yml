@@ -10,9 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: List directory
-        run: ls -l
+        run: ls -la
       - name: Add Discord Token
-        run: echo 'TOKEN=${{ secrets.DISCORD_TOKEN }}' > .env
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: echo "TOKEN=$DISCORD_TOKEN" > .env
       - name: Docker Login
         uses: docker/login-action@v1.8.0
         with:

@@ -83,8 +83,11 @@ class OpenInvite {
       })
       .catch(error => {
         Logger.error(`Failed to login. ${error}`);
-        Logger.error(token);
-        process.exit();
+        Logger.debug(token);
+        this.sleep(30000).then(() => {
+          Logger.info("Exiting...");
+          process.exit();
+        });
       });
   }
 
@@ -96,17 +99,17 @@ class OpenInvite {
       commandHandler.sessionManager.endAllSessions();
     }
 
-    const sleep = (milliseconds) => {
-      return new Promise(resolve => setTimeout(resolve, milliseconds));
-    };
-
     // Sleeping before exiting to make sure all exit-related API requests go through.
     // Not the best solution but it works. ¯\_(ツ)_/¯
     Logger.info("Sleeping...");
-    sleep(5000).then(() => {
+    this.sleep(5000).then(() => {
       Logger.info("Exiting...");
       process.exit();
     });
+  }
+
+  sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
   }
 }
 
