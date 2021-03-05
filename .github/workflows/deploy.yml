@@ -9,12 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Add Discord Token
-        env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-        run: echo "TOKEN=$DISCORD_TOKEN" > test
-      - name: List directory
-        run: ls -la
       - name: Docker Login
         uses: docker/login-action@v1.8.0
         with:
@@ -23,4 +17,5 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v2.3.0
         with:
-          pull: true
+          secrets: "TOKEN=${{ secrets.DISCORD_TOKEN }}"
+          secret-file: "TOKEN=.env"
