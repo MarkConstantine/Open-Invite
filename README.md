@@ -1,10 +1,18 @@
-# Open-Invite
+# 2022 Update
+
+This bot was developed before Discord added a feature called [Scheduled Events](https://support.discord.com/hc/en-us/articles/4409494125719-Scheduled-Events) which adds first-class support for the problem that this bot tried to solve. If you're looking for a way to schedule events in your Discord server, then I highly recommend looking into it. 
+
+As a result, this bot is no longer going to be maintained. There's only so much one can do with embed messages and reaction buttons.
+
+¯\\_(ツ)_/¯
+
+## Open-Invite
 
 A Discord bot for creating an open invite to anything (games, events, etc.) for your users. Removes the hassle of having to ask everyone. Helps keep track of those involved. Built with **Discord.js** and **Node v12.16.2**.
 
 ![GIF of the bot in action](/docs/example.gif)
 
-## How to Use
+### How to Use
 
 | How To                                                                                                   | Command                          |
 |----------------------------------------------------------------------------------------------------------|----------------------------------|
@@ -21,7 +29,7 @@ A Discord bot for creating an open invite to anything (games, events, etc.) for 
 | Roll a dice with any number of sides                                                                     | !rolldice [NUMBER_OF_SIDES]      |
 | Randomly assign your session's users into teams (Reset to normal session if [NUMBER_OF_TEAMS] is 0 or 1) | !teams [NUMBER_OF_TEAMS]         |
 
-## Setup
+### Setup
 
 1. Download the latest LTS Node version from [here](https://nodejs.org/en/) if you do not already have it.
 2. Follow Discord's tutorial [here](https://discord.onl/2019/03/21/how-to-set-up-a-bot-application/) to create a new bot.
